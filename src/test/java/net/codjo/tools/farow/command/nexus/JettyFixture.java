@@ -19,10 +19,11 @@ public abstract class JettyFixture {
     public static final java.lang.String APPLICATION_XML = "application/xml";
     static final String JETTY_REALM_PROPERTY_FILE = "/net/codjo/tools/farow/command/nexus/jettyRealm.properties";
     private Server server;
+    public static final int PORT = 7777;
 
 
     public void doSetup() throws Exception {
-        server = getJettyServer(8080);
+        server = getJettyServer(PORT);
         server.start();
     }
 

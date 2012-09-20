@@ -31,12 +31,16 @@ public class NexusApiTest extends JettyFixture {
     public void test_proxyWithhttpClient() throws Exception {
         String repositoryId = "marcona";
 
-        NexusApi nexusApi = new NexusApi("http://localhost:8080/");
+        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
 
         Repository initialRepository = nexusApi.getRepository("marcona", "admin", "admin");
         assertNull(initialRepository.getData().getRemoteStorage().getHttpProxySettings());
 
-        Repository repositoryWithProxy = nexusApi.setProxySettings(repositoryId,"admin", "admin", "GROUPE\\MARCONNET", "coucou" );
+        Repository repositoryWithProxy = nexusApi.setProxySettings(repositoryId,
+                                                                   "admin",
+                                                                   "admin",
+                                                                   "GROUPE\\MARCONNET",
+                                                                   "coucou");
         assertNotNull(repositoryWithProxy.getData().getRemoteStorage().getHttpProxySettings());
 
         Repository withoutProxyRepository = nexusApi.removeProxySettings(repositoryId, "admin", "admin");
