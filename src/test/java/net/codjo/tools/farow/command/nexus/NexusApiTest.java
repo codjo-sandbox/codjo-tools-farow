@@ -52,7 +52,8 @@ public class NexusApiTest extends JettyFixture {
 
         return "<repository>\n"
                + " <data>\n"
-               + "  <contentResourceURI>http://a7wa008:8080/nexus/content/repositories/marcona</contentResourceURI> \n"
+               + "  <contentResourceURI>http://a7wa008:" + PORT
+               + "/nexus/content/repositories/marcona</contentResourceURI> \n"
                + "  <id>" + repositoryId + "</id> \n"
                + "  <name>marcona-name</name> \n"
                + "  <provider>maven2</provider> \n"

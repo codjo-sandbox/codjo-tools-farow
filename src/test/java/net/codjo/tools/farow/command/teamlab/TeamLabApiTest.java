@@ -35,7 +35,7 @@ public class TeamLabApiTest extends JettyFixture {
 
     @Test
     public void test_teamLabApi() throws IOException {
-        TeamLabApi api = new TeamLabApi("http://localhost:8080", "admin", "admin", null);
+        TeamLabApi api = new TeamLabApi("http://localhost:"+PORT, "admin", "admin", null);
 
         assertThat(api.getToken(), is(FAKE_TOKEN));
         assertThat(api.getAllEvents(), is(""));
