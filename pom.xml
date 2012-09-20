@@ -1,0 +1,206 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+     | POM Relationships
+     -->
+
+    <parent>
+        <groupId>net.codjo.pom</groupId>
+        <artifactId>codjo-pom-application</artifactId>
+        <version>SNAPSHOT</version>
+    </parent>
+    <groupId>net.codjo.tools.farow</groupId>
+    <artifactId>codjo-tools-farow</artifactId>
+    <version>2.5-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>net.codjo.util</groupId>
+            <artifactId>codjo-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.gui-toolkit</groupId>
+            <artifactId>codjo-gui-toolkit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.test</groupId>
+            <artifactId>codjo-test-common</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>xstream</groupId>
+            <artifactId>xstream</artifactId>
+        </dependency>
+        <!-- LOGGING DEPENDENCIES - LOG4J -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <!--  JETTY DEPENDENCIES FOR TESTING  -->
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!--
+    | Project Information
+    -->
+
+    <name>tools &gt; farow</name>
+    <description>Outil permettant d'assister la stabilisation du framework</description>
+    <inceptionYear>2007</inceptionYear>
+
+    <!--
+    | Build Settings
+    -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>ideauidesigner-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.bud.maven.mojo</groupId>
+                <artifactId>maven-simplewebstart-plugin</artifactId>
+                <configuration>
+                    <jnlp>
+                        <codebase>${developmentPortalUrl}/codjo-tools-farow</codebase>
+                        <title>farow ${project.version} - Codjo</title>
+                        <!--<icon></icon>-->
+                        <mainClass>net.codjo.tools.farow.Farow</mainClass>
+                        <permission>all</permission>
+                        <arguments>
+                            <argument>-version</argument>
+                            <argument>${project.version}</argument>
+                            <argument>-githubAccount</argument>
+                            <argument>${githubAccount}</argument>
+                            <argument>-githubPassword</argument>
+                            <argument>${githubPassword}</argument>
+                            <argument>-nexusAccount</argument>
+                            <argument>${nexusAccount}</argument>
+                            <argument>-nexusPassword</argument>
+                            <argument>${nexusPassword}</argument>
+                            <argument>-nexusHostUrl</argument>
+                            <argument>${nexusHostUrl}</argument>
+                        </arguments>
+                    </jnlp>
+                    <resourcesAddOn><![CDATA[<property name="farow.libFile.url" value="${developmentPortalUrl}/codjo-tools-farow/OrdonnencementLib.properties" />]]></resourcesAddOn>
+                    <sign>
+                        <alias>${signatureAlias}</alias>
+                        <keypass>${signatureKeypass}</keypass>
+                        <storepass>${signatureStorepass}</storepass>
+                        <keystore>${signatureKeystore}</keystore>
+                    </sign>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>deploy-jnlp</id>
+            <activation>
+                <property>
+                    <name>process</name>
+                    <value>integration</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>net.codjo.maven.mojo</groupId>
+                        <artifactId>maven-config-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.jcraft</groupId>
+                                <artifactId>jsch</artifactId>
+                                <version>0.1.41</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant</groupId>
+                                <artifactId>ant-jsch</artifactId>
+                                <version>1.7.0</version>
+                                <exclusions>
+                                    <exclusion>
+                                        <groupId>org.apache.ant</groupId>
+                                        <artifactId>ant</artifactId>
+                                    </exclusion>
+                                </exclusions>
+                            </dependency>
+                            <dependency>
+                                <groupId>commons-net</groupId>
+                                <artifactId>commons-net</artifactId>
+                                <version>1.4.1</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>ant</groupId>
+                                <artifactId>ant-commons-net</artifactId>
+                                <version>1.6.5</version>
+                            </dependency>
+
+                            <dependency>
+                                <groupId>ant</groupId>
+                                <artifactId>ant-nodeps</artifactId>
+                                <version>1.6.5</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <id>deploy-jnlp</id>
+                                <phase>install</phase>
+                                <configuration>
+                                    <tasks>
+                                        <sshexec host="wp-documentation" username="DEV4D"
+                                                 keyfile="${developmentPortalSshKey}" passphrase="" trust="true"
+                                                 command="rm -rf /cygdrive/d/Dev/platform/tools/tomcat/tomcat-6.0.18/webapps/webdav/codjo-tools-farow/*"/>
+
+                                        <scp todir="DEV4D@wp-documentation:/cygdrive/d/Dev/platform/tools/tomcat/tomcat-6.0.18/webapps/webdav/codjo-tools-farow"
+                                             keyfile="${developmentPortalSshKey}" passphrase="">
+                                            <fileset dir="${project.basedir}/target/jnlp">
+                                                <include name="**/*.*"/>
+                                            </fileset>
+                                            <fileset dir="${project.basedir}/target/config">
+                                                <include name="OrdonnencementLib.properties"/>
+                                            </fileset>
+                                        </scp>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <!--
+    | Environment Information
+    -->
+
+    <scm>
+        <connection>scm:git:https://github.com/codjo/codjo-tools-farow.git</connection>
+        <developerConnection>scm:git:https://github.com/codjo/codjo-tools-farow.git</developerConnection>
+        <url>https://github.com/codjo/codjo-tools-farow.git</url>
+    </scm>
+</project>

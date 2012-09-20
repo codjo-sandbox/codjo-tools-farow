@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<idea>
+    <execConfiguration>
+        <name>Farow</name>
+        <description>Lance une release</description>
+        <execClass>net.codjo.tools.farow.Farow</execClass>
+        <vmParameter>-Dlog4j.configuration="file:${user.home}/log4j.properties"  -Dfarow.libFile.url="file:////${basedir}\src\config\OrdonnencementLib.properties"</vmParameter>
+        <parameter>-version ${project.version} -githubAccount ${githubAccount} -githubPassword ${githubPassword} -nexusAccount ${nexusAccount} -nexusPassword ${nexusPassword} -nexusHostUrl ${nexusHostUrl}</parameter>
+        <workdir>${basedir}</workdir>
+        <module>codjo-tools-farow</module>
+    </execConfiguration>
+</idea>

@@ -1,0 +1,31 @@
+[user]
+	name = marcona
+	email = codjo.master@codjo.net
+	proxy = BAD_CATEGORIE_UN
+
+[http]
+#Comment
+
+	proxy = GROUPE\\MARCONA:GLOUGLOU@ehttp1:80
+
+[github]
+	proxy = BAD_CATEGORIE_UN
+	user = marcona
+	token = 1ec3ac5a358a179e589d462554d1669f
+[alias]
+	plog = log --pretty=oneline -5
+	conf = config --list
+	st = status
+	bb = branch -a	
+	com-test= commit -a 
+[merge]
+    tool = kdiff3
+[mergetool "kdiff3"]
+    path = C:/dev/platform/tools/kdiff3/kdiff3-0.9.94/kdiff3.exe
+    keepBackup = false
+    trustExitCode = false
+	promt = false
+[core]
+	autocrlf = true
+[color]
+	ui = true
