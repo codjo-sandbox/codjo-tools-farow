@@ -25,11 +25,8 @@ public abstract class ArtifactStep extends Step {
     }
 
 
-    static String getCodjoDeploymentParameter(ArtifactType type) {
-        if (type.equals(ArtifactType.LIB) || type.equals(ArtifactType.SUPER_POM)) {
-            return "-Darguments='" + REMOTE_CODJO + "'";
-        }
-        return "";
+    static String getCodjoDeploymentParameter() {
+        return "-Darguments='" + REMOTE_CODJO + "'";
     }
 
 

@@ -104,7 +104,7 @@ public class ReleaseForm {
                     sortModel();
                 }
                 catch (Exception error) {
-                    ;
+                    //
                 }
 
                 runBuild(getFirstUndoneBuild(), "Stabilisations");
@@ -261,7 +261,7 @@ public class ReleaseForm {
         player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "release:perform",
                                     "-Ddocumentation=disabled",
                                     ArtifactStep.getGitScmAdditionalParameter(ArtifactType.SUPER_POM, "unused"),
-                                    ArtifactStep.getCodjoDeploymentParameter(ArtifactType.SUPER_POM)));
+                                    ArtifactStep.getCodjoDeploymentParameter()));
 
         StepInvoker invoker = new StepInvoker("Premières étapes", player);
         invoker.start();
@@ -472,11 +472,13 @@ public class ReleaseForm {
         int result = fileChooser.showSaveDialog(mainPanel);
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            selectedFile.createNewFile();
+            boolean succeffullyCreated = selectedFile.createNewFile();
 
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(selectedFile));
-            printBuildList(bufferedWriter);
-            bufferedWriter.close();
+            if (succeffullyCreated) {
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(selectedFile));
+                printBuildList(bufferedWriter);
+                bufferedWriter.close();
+            }
         }
     }
 

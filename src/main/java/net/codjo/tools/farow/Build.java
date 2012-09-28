@@ -25,8 +25,7 @@ public class Build extends ArtifactStep {
         player.add(new MavenCommand(type, name, "codjo:switch-to-parent-release"));
         player.add(new MavenCommand(type, name, "release:prepare"));
         player.add(new MavenCommand(type, name, "release:perform",
-                                    getGitScmAdditionalParameter(type, name),
-                                    getCodjoDeploymentParameter(type)));
+                                    getGitScmAdditionalParameter(type, name), getCodjoDeploymentParameter()));
         player.add(new MavenCommand(type, name, "codjo:switch-to-parent-snapshot"));
 
         return player;
