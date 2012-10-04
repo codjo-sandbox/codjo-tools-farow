@@ -77,21 +77,21 @@ public abstract class JettyFixture {
 
 
     private Server getJettyServer(int port) throws IOException {
-        Server server = new Server();
+        Server newServer = new Server();
         SocketConnector connector = new SocketConnector();
 
         // Set some timeout options to make debugging easier.
         connector.setMaxIdleTime(1000 * 60 * 60);
         connector.setSoLingerTime(-1);
         connector.setPort(port);
-        server.setConnectors(new Connector[]{connector});
+        newServer.setConnectors(new Connector[]{connector});
 
         String[] roles = getRoles();
         if (roles != null && roles.length != 0) {
-            addSecurityContext(server, roles,
+            addSecurityContext(newServer, roles,
                                getClass().getResource(JETTY_REALM_PROPERTY_FILE).getPath());
         }
-        server.addHandler(new AbstractHandler() {
+        newServer.addHandler(new AbstractHandler() {
             public void handle(String target,
                                HttpServletRequest httpServletRequest,
                                HttpServletResponse httpServletResponse,
@@ -100,7 +100,7 @@ public abstract class JettyFixture {
                 handleHttpRequest(target, httpServletRequest, httpServletResponse);
             }
         });
-        return server;
+        return newServer;
     }
 
 
