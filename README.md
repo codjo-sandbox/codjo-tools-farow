@@ -42,3 +42,5 @@ TODO :
    - forked project deletion
    - refork super-pom at the end of the process
 * Bug : si on clique sur "Annuler" on a un warning le numéro de version ne doit pas être null...
+* Bug : les plugin ne sont pas downloadés (et artifacts de build)
+* Feature : voir si on peut utiliser Nexus pour verifier les download des artifacts avec les bonne versions.
