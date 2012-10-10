@@ -41,3 +41,4 @@ TODO :
    - verify pull requests before starting stabilisation
    - forked project deletion
    - refork super-pom at the end of the process
+* Bug : si on clique sur "Annuler" on a un warning le numéro de version ne doit pas être null...
