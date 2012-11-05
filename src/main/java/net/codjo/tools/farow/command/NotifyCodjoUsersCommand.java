@@ -1,4 +1,5 @@
 package net.codjo.tools.farow.command;
+import net.codjo.tools.farow.Display;
 import net.codjo.tools.farow.command.teamlab.ProxyInformation;
 import net.codjo.tools.farow.command.teamlab.TeamLabApi;
 import net.codjo.tools.farow.util.GitConfigUtil;

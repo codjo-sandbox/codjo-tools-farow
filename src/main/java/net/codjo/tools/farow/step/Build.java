@@ -1,4 +1,4 @@
-package net.codjo.tools.farow;
+package net.codjo.tools.farow.step;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CleanUpDirectoryCommand;
 import net.codjo.tools.farow.command.CommandPlayer;
@@ -11,6 +11,12 @@ public class Build extends ArtifactStep {
 
     public Build(ArtifactType artifactType, String name) {
         super(artifactType, name, createPlayer(artifactType, name));
+    }
+
+
+    @Override
+    public String getAuditMessage() {
+        return "Stabilisation";
     }
 
 
@@ -29,11 +35,5 @@ public class Build extends ArtifactStep {
         player.add(new MavenCommand(type, name, "codjo:switch-to-parent-snapshot"));
 
         return player;
-    }
-
-
-    @Override
-    protected String getAuditMessage() {
-        return "Stabilisation";
     }
 }

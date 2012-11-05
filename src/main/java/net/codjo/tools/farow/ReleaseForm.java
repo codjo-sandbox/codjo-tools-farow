@@ -37,7 +37,7 @@ import net.codjo.gui.toolkit.util.ErrorDialog;
 import net.codjo.i18n.common.Language;
 import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.gui.TranslationNotifier;
-import net.codjo.tools.farow.Step.State;
+import net.codjo.tools.farow.step.Step.State;
 import net.codjo.tools.farow.command.ArtifactSorter;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CleanInhouseSnapshot;
@@ -45,7 +45,6 @@ import net.codjo.tools.farow.command.CleanUpDirectoryCommand;
 import net.codjo.tools.farow.command.Command;
 import net.codjo.tools.farow.command.CommandPlayer;
 import net.codjo.tools.farow.command.CopyPomCommand;
-import net.codjo.tools.farow.command.Display;
 import net.codjo.tools.farow.command.GetItCommand;
 import net.codjo.tools.farow.command.IdeaCommand;
 import net.codjo.tools.farow.command.LockRepoCommand;
@@ -53,6 +52,11 @@ import net.codjo.tools.farow.command.MavenCommand;
 import net.codjo.tools.farow.command.NotifyCodjoUsersCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
+import net.codjo.tools.farow.step.ArtifactStep;
+import net.codjo.tools.farow.step.Build;
+import net.codjo.tools.farow.step.DeleteRepo;
+import net.codjo.tools.farow.step.Publish;
+import net.codjo.tools.farow.step.Step;
 import net.codjo.tools.farow.util.GitConfigUtil;
 /**
  *

@@ -1,8 +1,8 @@
-package net.codjo.tools.farow;
+package net.codjo.tools.farow.step;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CommandPlayer;
 public abstract class ArtifactStep extends Step {
-    static final String REMOTE_CODJO = "-Dremote=codjo";
+    public static final String REMOTE_CODJO = "-Dremote=codjo";
     private ArtifactType type;
 
 
@@ -17,7 +17,15 @@ public abstract class ArtifactStep extends Step {
     }
 
 
-    static String getGitScmAdditionalParameter(ArtifactType type, String name) {
+    public ArtifactType getType() {
+        return type;
+    }
+
+
+    public abstract String getAuditMessage();
+
+
+    public static String getGitScmAdditionalParameter(ArtifactType type, String name) {
         if (type.equals(ArtifactType.LIB) || type.equals(ArtifactType.SUPER_POM)) {
             return "-DconnectionUrl=scm:git:file:///" + type.toArtifactPath(name) + "\\.git";
         }
@@ -25,8 +33,13 @@ public abstract class ArtifactStep extends Step {
     }
 
 
-    static String getCodjoDeploymentParameter() {
+    public static String getCodjoDeploymentParameter() {
         return "-Darguments='" + REMOTE_CODJO + "'";
+    }
+
+
+    static boolean isGithubAware(ArtifactType type, String name) {
+        return !"".equals(getGitScmAdditionalParameter(type, name));
     }
 
 
@@ -37,17 +50,4 @@ public abstract class ArtifactStep extends Step {
         }
         return super.getFinishingState();
     }
-
-
-    public ArtifactType getType() {
-        return type;
-    }
-
-
-    static boolean isGithubAware(ArtifactType type, String name) {
-        return !"".equals(getGitScmAdditionalParameter(type, name));
-    }
-
-
-    protected abstract String getAuditMessage();
 }

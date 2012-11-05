@@ -1,4 +1,4 @@
-package net.codjo.tools.farow.command;
+package net.codjo.tools.farow;
 /**
  *
  */

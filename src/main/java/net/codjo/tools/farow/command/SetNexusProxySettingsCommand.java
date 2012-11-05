@@ -1,5 +1,6 @@
 package net.codjo.tools.farow.command;
 import java.util.Properties;
+import net.codjo.tools.farow.Display;
 import net.codjo.tools.farow.command.nexus.NexusApi;
 /**
  *

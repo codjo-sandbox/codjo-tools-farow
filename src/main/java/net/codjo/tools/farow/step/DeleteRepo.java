@@ -1,4 +1,4 @@
-package net.codjo.tools.farow;
+package net.codjo.tools.farow.step;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CommandPlayer;
 import net.codjo.tools.farow.command.GithubDeleteRepoCommand;
@@ -9,6 +9,12 @@ public class DeleteRepo extends ArtifactStep {
 
     public DeleteRepo(Publish build) {
         super(build.getType(), build.getName(), createPlayer(build.getType(), build.getName()));
+    }
+
+
+    @Override
+    public String getAuditMessage() {
+        return "Delete repo";
     }
 
 
@@ -25,11 +31,5 @@ public class DeleteRepo extends ArtifactStep {
     @Override
     protected State getFinishingState() {
         return State.DONE;
-    }
-
-
-    @Override
-    protected String getAuditMessage() {
-        return "Delete repo";
     }
 }
