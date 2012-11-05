@@ -325,7 +325,7 @@ public class ReleaseForm {
             player.add(new CleanInhouseSnapshot());
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "deploy"));
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "deploy", ArtifactStep.REMOTE_CODJO));
-//            Rapatriement des librairies postées sur repo.codjo.net avec maven et nexus
+            // Rapatriement des librairies postées sur repo.codjo.net avec maven et nexus
             player.add(new SetNexusProxySettingsCommand(proxy.getProxyUserName(),
                                                         proxy.getProxyPassword(),
                                                         properties));
