@@ -22,6 +22,7 @@ import org.jdom.output.XMLOutputter;
  */
 public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
     private static final String LS = System.getProperty("line.separator");
+    static final String NET_CODJO_PREFIX = "net.codjo";
 
     private String destinationDirectory;
     private String frameworkVersion;
@@ -128,7 +129,7 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
 
     protected static void addPluginsAsDependencies(Document document, Element dependencies) {
         Namespace namespace = dependencies.getNamespace();
-        Iterator plugins = document.getDescendants(new PluginFilter());
+        Iterator plugins = document.getDescendants(new CodjoPluginFilter());
         while (plugins.hasNext()) {
             Element element = (Element)plugins.next();
             Element newDependency = new Element("dependency", namespace);
@@ -142,15 +143,15 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
 
 
     protected static void addTypeToClassifierInDependencies(Element dependencies,
-                                                          String type,
-                                                          String classifier) {
+                                                            String type,
+                                                            String classifier) {
         addTypeOnFilter(dependencies, type, new ClassifierDependenciesFilter(classifier));
     }
 
 
     protected static void addTypeToDependency(Element dependencies,
-                                            String type,
-                                            String groupId, String artifactId, boolean withClassifier) {
+                                              String type,
+                                              String groupId, String artifactId, boolean withClassifier) {
         addTypeOnFilter(dependencies, type, new DependencyFilter(groupId, artifactId, withClassifier));
     }
 
@@ -168,19 +169,23 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
     }
 
 
-    private static class PluginFilter implements Filter {
+    private static class CodjoPluginFilter implements Filter {
         public boolean matches(Object obj) {
             if (obj instanceof Element) {
                 Element element = (Element)obj;
 
                 if (element.getName().matches("plugin")) {
-                    Element parentElement = element.getParentElement();
+                    Element elementGroupId = element.getChild("groupId", element.getNamespace());
+                    if (elementGroupId != null && elementGroupId.getValue().startsWith(NET_CODJO_PREFIX)) {
 
-                    if (parentElement.getName().matches("plugins")) {
-                        Element grantParentElement = parentElement.getParentElement();
+                        Element parentElement = element.getParentElement();
 
-                        if (grantParentElement.getName().matches("pluginManagement")) {
-                            return grantParentElement.getParentElement().getName().matches("build");
+                        if (parentElement.getName().matches("plugins")) {
+                            Element grantParentElement = parentElement.getParentElement();
+
+                            if (grantParentElement.getName().matches("pluginManagement")) {
+                                return grantParentElement.getParentElement().getName().matches("build");
+                            }
                         }
                     }
                 }
