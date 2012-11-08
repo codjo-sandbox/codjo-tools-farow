@@ -7,6 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Response;
 
 import static net.codjo.test.common.matcher.JUnitMatchers.*;
 import static org.junit.Assert.assertNotNull;
@@ -218,32 +219,35 @@ public class NexusApiTest extends JettyFixture {
 
         String[] urls = target.split("/");
         String repositoryId = urls[urls.length - 1];
-        try {
-            if ("GET".equals(request.getMethod())) {
-                String mockedResponse = "";
-                if (target.contains("repositories")) {
-                    mockedResponse = getMockedResponse(repositoryId);
+        int status = ((Response)response).getStatus();
+        if (status == 200) {
+            try {
+                if ("GET".equals(request.getMethod())) {
+                    String mockedResponse = "";
+                    if (target.contains("repositories")) {
+                        mockedResponse = getMockedResponse(repositoryId);
+                    }
+                    if (target.contains("schedule_run")) {
+                        mockedResponse = getMockResultForRunSchedule();
+                    }
+                    if (target.contains("schedules")) {
+                        mockedResponse = getMockScheduleList();
+                    }
+                    response.getWriter().print(mockedResponse);
+                    response.getWriter().close();
                 }
-                if (target.contains("schedule_run")) {
-                    mockedResponse = getMockResultForRunSchedule();
+                if ("PUT".equals(request.getMethod())) {
+                    response.getWriter().print(decode(request));
+                    response.getWriter().close();
                 }
-                if (target.contains("schedules")) {
-                    mockedResponse = getMockScheduleList();
-                }
-                response.getWriter().print(mockedResponse);
-                response.getWriter().close();
+                response.setStatus(HttpServletResponse.SC_OK);
             }
-            if ("PUT".equals(request.getMethod())) {
-                response.getWriter().print(decode(request));
-                response.getWriter().close();
+            catch (IOException e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
-            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType(APPLICATION_XML);
+            ((Request)request).setHandled(true);
         }
-        catch (IOException e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        }
-        response.setContentType(APPLICATION_XML);
-        ((Request)request).setHandled(true);
     }
 }
