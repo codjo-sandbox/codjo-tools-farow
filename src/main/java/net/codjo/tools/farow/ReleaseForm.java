@@ -345,10 +345,10 @@ public class ReleaseForm {
 
             player.add(new CleanUpDirectoryCommand(temporaryLocalRepository));
             player.add(new IdeaCommand(ArtifactType.LIB, codjoPomAllDepsDirectory, temporaryLocalRepository));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:find-release-version"));
             player.add(new RebuildNexusPomMetaDataCommand(properties));
             player.add(new SetNexusProxySettingsCommand(null, null, properties));
 
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:find-release-version"));
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-after-release"));
             StepInvoker invoker = new StepInvoker("Finalisation", player);
             invoker.start();
