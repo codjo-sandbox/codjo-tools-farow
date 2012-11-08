@@ -50,17 +50,17 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
         pom = pom.replace("<artifactId>codjo-pom</artifactId>", "<artifactId>codjo-pom-alldeps</artifactId>");
         pom = pom.replace("<groupId>commons-jexl</groupId>", "<groupId>org.apache.commons</groupId>");
 
-        pom = completDependencies(pom, frameworkVersion);
+        pom = completeDependencies(pom, frameworkVersion);
 
         return pom;
     }
 
 
-    public static String completDependencies(String inputXml, final String frameworkVersion)
+    public static String completeDependencies(String inputXml, final String frameworkVersion)
           throws JDOMException, IOException {
         Document document = new SAXBuilder().build(new StringReader(inputXml));
 
-        document = completDocument(document, frameworkVersion);
+        document = completeDocument(document, frameworkVersion);
 
         return documentToString(document);
     }
@@ -79,7 +79,7 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
     }
 
 
-    public static Document completDocument(Document document, String frameworkVersion) {
+    public static Document completeDocument(Document document, String frameworkVersion) {
         Element rootElement = document.getRootElement();
         Namespace namespace = rootElement.getNamespace();
         Element dependencies = rootElement.getChild("dependencies", namespace);

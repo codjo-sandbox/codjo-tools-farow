@@ -37,7 +37,6 @@ import net.codjo.gui.toolkit.util.ErrorDialog;
 import net.codjo.i18n.common.Language;
 import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.gui.TranslationNotifier;
-import net.codjo.tools.farow.step.Step.State;
 import net.codjo.tools.farow.command.ArtifactSorter;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CleanInhouseSnapshot;
@@ -51,12 +50,14 @@ import net.codjo.tools.farow.command.LockRepoCommand;
 import net.codjo.tools.farow.command.MavenCommand;
 import net.codjo.tools.farow.command.NotifyCodjoUsersCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
+import net.codjo.tools.farow.command.RebuildNexusPomMetaDataCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
 import net.codjo.tools.farow.step.ArtifactStep;
 import net.codjo.tools.farow.step.Build;
 import net.codjo.tools.farow.step.DeleteRepo;
 import net.codjo.tools.farow.step.Publish;
 import net.codjo.tools.farow.step.Step;
+import net.codjo.tools.farow.step.Step.State;
 import net.codjo.tools.farow.util.GitConfigUtil;
 /**
  *
@@ -345,6 +346,7 @@ public class ReleaseForm {
             player.add(new CleanUpDirectoryCommand(temporaryLocalRepository));
             player.add(new IdeaCommand(ArtifactType.LIB, codjoPomAllDepsDirectory, temporaryLocalRepository));
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:find-release-version"));
+            player.add(new RebuildNexusPomMetaDataCommand(properties));
             player.add(new SetNexusProxySettingsCommand(null, null, properties));
 
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-after-release"));

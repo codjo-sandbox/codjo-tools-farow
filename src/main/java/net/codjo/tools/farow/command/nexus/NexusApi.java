@@ -15,19 +15,28 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
+import static net.codjo.tools.farow.command.nexus.DomUtil.buildDocument;
+import static net.codjo.tools.farow.command.nexus.DomUtil.extractNodeByXpath;
 /**
  *
  */
 public class NexusApi {
     static final String CHARSET = "UTF-8";
     static final String SERVICE_URL = "nexus/service/local/repositories/";
+    static final String SCHEDULE_TASK_RUN_URL = "nexus/service/local/schedule_run/";
+    static final String SCHEDULE_TASK_LIST_URL = "nexus/service/local/schedules/";
     static final String PROXY_HOST = "ehttp1";
     static final int PROXY_PORT = 80;
     private String url;
+    private String hostUrl;
 
 
     public NexusApi(String hostUrl) {
-        this.url = NexusApi.getRepositoryServiceUrl(hostUrl, NexusApi.SERVICE_URL);
+        this.hostUrl = hostUrl;
+        this.url = NexusApi.getRepositoryServiceUrl(this.hostUrl, NexusApi.SERVICE_URL);
     }
 
 
@@ -55,6 +64,43 @@ public class NexusApi {
     }
 
 
+    public String runScheduledTask(String scheduledTaskId, String nexusAccount, String nexusPassword)
+          throws Exception {
+        HttpMethod getRepositoryHttpMethod = buildHttpMethod(
+              getRepositoryServiceUrl(hostUrl, SCHEDULE_TASK_RUN_URL), false, scheduledTaskId);
+        HttpMethod httpMethod = executeHttpMethod(nexusAccount, nexusPassword, getRepositoryHttpMethod);
+        return getResponseAsString(httpMethod).toString();
+    }
+
+
+    public String getScheduledTaskId(String scheduledTaskName, String nexusAccount, String nexusPassword)
+          throws Exception {
+        HttpMethod getRepositoryHttpMethod = buildHttpMethod(
+              getRepositoryServiceUrl(hostUrl, SCHEDULE_TASK_LIST_URL), false, "");
+        HttpMethod httpMethod = executeHttpMethod(nexusAccount, nexusPassword, getRepositoryHttpMethod);
+        return getScheduleIdFromResponse(httpMethod, scheduledTaskName);
+    }
+
+
+    private String getScheduleIdFromResponse(HttpMethod httpMethod, String scheduledTaskName)
+          throws Exception {
+        Document document = buildDocument(httpMethod);
+        //On cherche tous les id dans les noeuds qui ont un attribut "name" avec la valeur scheduledTaskName
+        NodeList nodes = extractNodeByXpath(document,
+                                            "//schedules-list-item[name[text()='" + scheduledTaskName + "']]/id");
+
+        if (nodes.getLength() == 0) {
+            throw new Exception("Task " + scheduledTaskName + " not found in Nexus");
+        }
+
+        if (nodes.getLength() != 1) {
+            throw new Exception("Multiple Tasks have been found with the following name: " + scheduledTaskName);
+        }
+
+        return nodes.item(0).getTextContent();
+    }
+
+
     private static <T> T decodeHttpResponse(HttpMethod httpMethod) throws Exception {
         StringWriter writer = getResponseAsString(httpMethod);
         XmlCodec codec = new XmlCodec();
@@ -71,9 +117,9 @@ public class NexusApi {
     }
 
 
-    private static HttpMethod buildHttpMethod(String url, boolean isGetMethod, String repositoryId) {
+    private static HttpMethod buildHttpMethod(String url, boolean isPutMethod, String repositoryId) {
         final String uri = getRepositoryServiceUrl("http://", getHostByUrl(url + repositoryId));
-        return isGetMethod ? new PutMethod(uri) : new GetMethod(uri);
+        return isPutMethod ? new PutMethod(uri) : new GetMethod(uri);
     }
 
 

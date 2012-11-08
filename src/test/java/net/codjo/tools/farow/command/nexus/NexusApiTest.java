@@ -8,8 +8,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mortbay.jetty.Request;
 
+import static net.codjo.test.common.matcher.JUnitMatchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 /**
  *
  */
@@ -48,6 +51,33 @@ public class NexusApiTest extends JettyFixture {
     }
 
 
+    @Test
+    public void test_runScheduledTask() throws Exception {
+        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
+        assertThat(nexusApi.runScheduledTask("41", "admin", "admin").contains("<status>SUBMITTED</status>"), is(true));
+    }
+
+
+    @Test
+    public void test_getScheduledTaskByName() throws Exception {
+        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
+        assertThat(nexusApi.getScheduledTaskId("RebuildCodjoPomMetadata", "admin", "admin"), is("41"));
+    }
+
+
+    @Test
+    public void test_getScheduledTaskByNameNotFound() throws Exception {
+        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
+        try {
+            assertThat(nexusApi.getScheduledTaskId("patate", "admin", "admin"), nullValue());
+            fail();
+        }
+        catch (Exception e) {
+            assertThat(e.getMessage(), is("Task patate not found in Nexus"));
+        }
+    }
+
+
     private String getMockedResponse(String repositoryId) {
 
         return "<repository>\n"
@@ -81,6 +111,106 @@ public class NexusApiTest extends JettyFixture {
     }
 
 
+    private String getMockResultForRunSchedule() {
+        return " <schedule-service-status>\n"
+               + " <data>\n"
+               + " <resource>\n"
+               + "  <id>41</id> \n"
+               + "  <name>RebuildCodjoPomMetadata</name> \n"
+               + "  <enabled>true</enabled> \n"
+               + "  <typeId>RebuildMavenMetadataTask</typeId> \n"
+               + "  <schedule>manual</schedule> \n"
+               + " <properties>\n"
+               + " <scheduled-task-property>\n"
+               + "  <key>resourceStorePath</key> \n"
+               + "  <value>/net/codjo/pom</value> \n"
+               + "  </scheduled-task-property>\n"
+               + " <scheduled-task-property>\n"
+               + "  <key>repositoryId</key> \n"
+               + "  <value>codjo-inhouse</value> \n"
+               + "  </scheduled-task-property>\n"
+               + "  </properties>\n"
+               + "  </resource>\n"
+               + "  <resourceURI>http://a7wa008:8080/nexus/service/local/schedule_run/41/41</resourceURI> \n"
+               + "  <status>SUBMITTED</status> \n"
+               + "  <readableStatus>Waiting</readableStatus> \n"
+               + "  <nextRunTime>n/a</nextRunTime> \n"
+               + "  <lastRunTime>Wed Nov 07 16:15:20 CET 2012</lastRunTime> \n"
+               + "  <lastRunResult>Ok</lastRunResult> \n"
+               + "  <created>Thu Oct 25 17:35:13 CEST 2012</created> \n"
+               + "  </data>\n"
+               + "  </schedule-service-status>";
+    }
+
+
+    private String getMockScheduleList() {
+        return "<schedules-list>\n"
+               + "  <data>\n"
+               + "    <schedules-list-item>\n"
+               + "      <resourceURI>http://a7wa008:8080/nexus/service/local/schedules/41</resourceURI>\n"
+               + "      <enabled>true</enabled>\n"
+               + "      <name>RebuildCodjoPomMetadata</name>\n"
+               + "      <id>41</id>\n"
+               + "      <typeId>RebuildMavenMetadataTask</typeId>\n"
+               + "      <typeName>Rebuild Maven Metadata Files</typeName>\n"
+               + "      <status>SUBMITTED</status>\n"
+               + "      <readableStatus>Waiting</readableStatus>\n"
+               + "      <schedule>manual</schedule>\n"
+               + "      <nextRunTime>n/a</nextRunTime>\n"
+               + "      <lastRunTime>Wed Nov 07 17:27:47 CET 2012</lastRunTime>\n"
+               + "      <lastRunResult>Ok [0s]</lastRunResult>\n"
+               + "      <created>Thu Oct 25 17:35:13 CEST 2012</created>\n"
+               + "    </schedules-list-item>\n"
+               + "    <schedules-list-item>\n"
+               + "      <resourceURI>http://a7wa008:8080/nexus/service/local/schedules/1</resourceURI>\n"
+               + "      <id>1</id>\n"
+               + "      <enabled>true</enabled>\n"
+               + "      <name>Download Indexes Central</name>\n"
+               + "      <typeId>DownloadIndexesTask</typeId>\n"
+               + "      <typeName>Download Indexes</typeName>\n"
+               + "      <status>SUBMITTED</status>\n"
+               + "      <readableStatus>Waiting</readableStatus>\n"
+               + "      <schedule>manual</schedule>\n"
+               + "      <nextRunTime>n/a</nextRunTime>\n"
+               + "      <lastRunTime>n/a</lastRunTime>\n"
+               + "      <lastRunResult>n/a</lastRunResult>\n"
+               + "      <created>Thu Oct 25 17:35:13 CEST 2012</created>\n"
+               + "    </schedules-list-item>\n"
+               + "    <schedules-list-item>\n"
+               + "      <resourceURI>http://a7wa008:8080/nexus/service/local/schedules/4</resourceURI>\n"
+               + "      <id>4</id>\n"
+               + "      <enabled>true</enabled>\n"
+               + "      <name>Repair index ZaideExternal</name>\n"
+               + "      <typeId>RepairIndexTask</typeId>\n"
+               + "      <typeName>Repair Repositories Index</typeName>\n"
+               + "      <status>SUBMITTED</status>\n"
+               + "      <readableStatus>Waiting</readableStatus>\n"
+               + "      <schedule>manual</schedule>\n"
+               + "      <nextRunTime>n/a</nextRunTime>\n"
+               + "      <lastRunTime>n/a</lastRunTime>\n"
+               + "      <lastRunResult>n/a</lastRunResult>\n"
+               + "      <created>Thu Oct 25 17:35:13 CEST 2012</created>\n"
+               + "    </schedules-list-item>\n"
+               + "    <schedules-list-item>\n"
+               + "      <resourceURI>http://a7wa008:8080/nexus/service/local/schedules/5</resourceURI>\n"
+               + "      <id>5</id>\n"
+               + "      <enabled>true</enabled>\n"
+               + "      <name>Repair index ZaideExternal</name>\n"
+               + "      <typeId>ExpireCacheTask</typeId>\n"
+               + "      <typeName>Expire Repository Caches</typeName>\n"
+               + "      <status>SUBMITTED</status>\n"
+               + "      <readableStatus>Waiting</readableStatus>\n"
+               + "      <schedule>manual</schedule>\n"
+               + "      <nextRunTime>n/a</nextRunTime>\n"
+               + "      <lastRunTime>n/a</lastRunTime>\n"
+               + "      <lastRunResult>n/a</lastRunResult>\n"
+               + "      <created>Thu Oct 25 17:35:13 CEST 2012</created>\n"
+               + "    </schedules-list-item>\n"
+               + "  </data>\n"
+               + "</schedules-list>";
+    }
+
+
     @Override
     protected void handleHttpRequest(String target,
                                      HttpServletRequest request,
@@ -90,7 +220,17 @@ public class NexusApiTest extends JettyFixture {
         String repositoryId = urls[urls.length - 1];
         try {
             if ("GET".equals(request.getMethod())) {
-                response.getWriter().print(getMockedResponse(repositoryId));
+                String mockedResponse = "";
+                if (target.contains("repositories")) {
+                    mockedResponse = getMockedResponse(repositoryId);
+                }
+                if (target.contains("schedule_run")) {
+                    mockedResponse = getMockResultForRunSchedule();
+                }
+                if (target.contains("schedules")) {
+                    mockedResponse = getMockScheduleList();
+                }
+                response.getWriter().print(mockedResponse);
                 response.getWriter().close();
             }
             if ("PUT".equals(request.getMethod())) {

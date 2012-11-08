@@ -4,9 +4,7 @@ import java.io.StringReader;
 import net.codjo.test.common.XmlUtil;
 import net.codjo.util.file.FileUtil;
 import org.jdom.Document;
-import org.jdom.Element;
 import org.jdom.JDOMException;
-import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 import org.junit.Test;
 /**
@@ -187,7 +185,7 @@ public class PrepareAPomToLoadSuperPomDependenciesCommandTest {
                         + "              </dependency>\n"
                         + endInput;
 
-        String actual = PrepareAPomToLoadSuperPomDependenciesCommand.completDependencies(inputXml, "2.24");
+        String actual = PrepareAPomToLoadSuperPomDependenciesCommand.completeDependencies(inputXml, "2.24");
 
         XmlUtil.assertEquivalent(etalon, actual);
     }
