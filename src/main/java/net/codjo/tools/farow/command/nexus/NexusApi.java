@@ -32,52 +32,49 @@ public class NexusApi {
     static final int PROXY_PORT = 80;
     private String url;
     private String hostUrl;
+    private String apiUserName;
+    private String apiPassword;
 
 
-    public NexusApi(String hostUrl) {
+    public NexusApi(String hostUrl, String apiUserName, String apiPassword) {
         this.hostUrl = hostUrl;
+        this.apiUserName = apiUserName;
+        this.apiPassword = apiPassword;
         this.url = NexusApi.getRepositoryServiceUrl(this.hostUrl, NexusApi.SERVICE_URL);
     }
 
 
-    public Repository getRepository(String repositoryId, String apiUserName, String apiPassword)
-          throws Exception {
+    public Repository getRepository(String repositoryId) throws Exception {
         HttpMethod getRepositoryHttpMethod = NexusApi.buildHttpMethod(url, false, repositoryId);
         HttpMethod httpMethod = NexusApi.executeHttpMethod(apiUserName, apiPassword, getRepositoryHttpMethod);
         return NexusApi.decodeHttpResponse(httpMethod);
     }
 
 
-    public Repository setProxySettings(String repositoryId,
-                                       String nexusAccount, String nexusPassword,
-                                       String proxyUserName, String proxyPassword)
+    public Repository setProxySettings(String repositoryId, String proxyUserName, String proxyPassword)
           throws Exception {
-        HttpProxySettings httpProxySettings = buildProxySettings(proxyUserName, proxyPassword);
-
-        return setProxySettings(repositoryId, nexusAccount, nexusPassword, httpProxySettings);
+        return setProxySettings(repositoryId, buildProxySettings(proxyUserName, proxyPassword));
     }
 
 
-    public Repository removeProxySettings(String repositoryId, String nexusAccount, String nexusPassword)
-          throws Exception {
-        return setProxySettings(repositoryId, nexusAccount, nexusPassword, null);
+    public Repository removeProxySettings(String repositoryId) throws Exception {
+        return setProxySettings(repositoryId, null);
     }
 
 
-    public String runScheduledTask(String scheduledTaskId, String nexusAccount, String nexusPassword)
-          throws Exception {
+    public String runScheduledTask(String scheduledTaskId) throws Exception {
         HttpMethod getRepositoryHttpMethod = buildHttpMethod(
               getRepositoryServiceUrl(hostUrl, SCHEDULE_TASK_RUN_URL), false, scheduledTaskId);
-        HttpMethod httpMethod = executeHttpMethod(nexusAccount, nexusPassword, getRepositoryHttpMethod);
+        HttpMethod httpMethod = executeHttpMethod(apiUserName, apiPassword, getRepositoryHttpMethod);
         return getResponseAsString(httpMethod).toString();
     }
 
 
-    public String getScheduledTaskId(String scheduledTaskName, String nexusAccount, String nexusPassword)
-          throws Exception {
-        HttpMethod getRepositoryHttpMethod = buildHttpMethod(
-              getRepositoryServiceUrl(hostUrl, SCHEDULE_TASK_LIST_URL), false, "");
-        HttpMethod httpMethod = executeHttpMethod(nexusAccount, nexusPassword, getRepositoryHttpMethod);
+    public String getScheduledTaskId(String scheduledTaskName) throws Exception {
+        HttpMethod getRepositoryHttpMethod = buildHttpMethod(getRepositoryServiceUrl(hostUrl, SCHEDULE_TASK_LIST_URL),
+                                                             false,
+                                                             "");
+        HttpMethod httpMethod = executeHttpMethod(apiUserName, apiPassword, getRepositoryHttpMethod);
         return getScheduleIdFromResponse(httpMethod, scheduledTaskName);
     }
 
@@ -165,15 +162,12 @@ public class NexusApi {
     }
 
 
-    private Repository setProxySettings(String repositoryId,
-                                        String nexusAccount, String nexusPassword, HttpProxySettings httpProxySettings)
-          throws Exception {
-        Repository repository = getRepository(repositoryId, nexusAccount,
-                                              nexusPassword);
+    private Repository setProxySettings(String repositoryId, HttpProxySettings httpProxySettings) throws Exception {
+        Repository repository = getRepository(repositoryId);
 
         repository.getData().getRemoteStorage().setHttpProxySettings(httpProxySettings);
         HttpMethod putHttpMethod = NexusApi.buildHttpPutMethod(url, true, repository);
-        return NexusApi.decodeHttpResponse(NexusApi.executeHttpMethod(nexusAccount, nexusPassword, putHttpMethod));
+        return NexusApi.decodeHttpResponse(NexusApi.executeHttpMethod(apiUserName, apiPassword, putHttpMethod));
     }
 
 

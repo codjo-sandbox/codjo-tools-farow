@@ -18,9 +18,12 @@ import static org.junit.Assert.fail;
  *
  */
 public class NexusApiTest extends JettyFixture {
+    private NexusApi nexusApi;
+
 
     @Before
     public void setup() throws Exception {
+        nexusApi = new NexusApi("http://localhost:" + PORT + "/", "admin", "admin");
         super.doSetup();
     }
 
@@ -35,42 +38,33 @@ public class NexusApiTest extends JettyFixture {
     public void test_proxyWithhttpClient() throws Exception {
         String repositoryId = "marcona";
 
-        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
-
-        Repository initialRepository = nexusApi.getRepository("marcona", "admin", "admin");
+        Repository initialRepository = nexusApi.getRepository("marcona");
         assertNull(initialRepository.getData().getRemoteStorage().getHttpProxySettings());
 
-        Repository repositoryWithProxy = nexusApi.setProxySettings(repositoryId,
-                                                                   "admin",
-                                                                   "admin",
-                                                                   "GROUPE\\MARCONNET",
-                                                                   "coucou");
+        Repository repositoryWithProxy = nexusApi.setProxySettings(repositoryId, "GROUPE\\MARCONNET", "coucou");
         assertNotNull(repositoryWithProxy.getData().getRemoteStorage().getHttpProxySettings());
 
-        Repository withoutProxyRepository = nexusApi.removeProxySettings(repositoryId, "admin", "admin");
+        Repository withoutProxyRepository = nexusApi.removeProxySettings(repositoryId);
         assertNull(withoutProxyRepository.getData().getRemoteStorage().getHttpProxySettings());
     }
 
 
     @Test
     public void test_runScheduledTask() throws Exception {
-        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
-        assertThat(nexusApi.runScheduledTask("41", "admin", "admin").contains("<status>SUBMITTED</status>"), is(true));
+        assertThat(nexusApi.runScheduledTask("41").contains("<status>SUBMITTED</status>"), is(true));
     }
 
 
     @Test
     public void test_getScheduledTaskByName() throws Exception {
-        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
-        assertThat(nexusApi.getScheduledTaskId("RebuildCodjoPomMetadata", "admin", "admin"), is("41"));
+        assertThat(nexusApi.getScheduledTaskId("RebuildCodjoPomMetadata"), is("41"));
     }
 
 
     @Test
     public void test_getScheduledTaskByNameNotFound() throws Exception {
-        NexusApi nexusApi = new NexusApi("http://localhost:" + PORT + "/");
         try {
-            assertThat(nexusApi.getScheduledTaskId("patate", "admin", "admin"), nullValue());
+            assertThat(nexusApi.getScheduledTaskId("patate"), nullValue());
             fail();
         }
         catch (Exception e) {
