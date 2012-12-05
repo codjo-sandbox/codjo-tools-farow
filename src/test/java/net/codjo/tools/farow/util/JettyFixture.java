@@ -1,9 +1,10 @@
-package net.codjo.tools.farow.command.nexus;
+package net.codjo.tools.farow.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.codjo.test.common.fixture.Fixture;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
@@ -12,18 +13,19 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.SecurityHandler;
-/**
- *
- */
-public abstract class JettyFixture {
-    public static final java.lang.String APPLICATION_XML = "application/xml";
-    static final String JETTY_REALM_PROPERTY_FILE = "/net/codjo/tools/farow/command/nexus/jettyRealm.properties";
+
+public abstract class JettyFixture implements Fixture {
     private Server server;
-    public static final int PORT = 7777;
+    private int webPort;
 
 
-    public void doSetup() throws Exception {
-        server = getJettyServer(PORT);
+    protected JettyFixture(int webPort) {
+        this.webPort = webPort;
+    }
+
+
+    public void doSetUp() throws Exception {
+        server = buildJettyServer(webPort);
         server.start();
     }
 
@@ -76,7 +78,7 @@ public abstract class JettyFixture {
     }
 
 
-    private Server getJettyServer(int port) throws IOException {
+    private Server buildJettyServer(int port) throws IOException {
         Server newServer = new Server();
         SocketConnector connector = new SocketConnector();
 
@@ -89,7 +91,7 @@ public abstract class JettyFixture {
         String[] roles = getRoles();
         if (roles != null && roles.length != 0) {
             addSecurityContext(newServer, roles,
-                               getClass().getResource(JETTY_REALM_PROPERTY_FILE).getPath());
+                               getClass().getResource(getRealmPropertyFile()).getPath());
         }
         newServer.addHandler(new AbstractHandler() {
             public void handle(String target,
@@ -104,7 +106,12 @@ public abstract class JettyFixture {
     }
 
 
+    protected String getRealmPropertyFile() {
+        return "jettyRealm.properties";
+    }
+
+
     protected String[] getRoles() {
-        return new String[]{"user", "admin", "moderator"};
+        return null;
     }
 }

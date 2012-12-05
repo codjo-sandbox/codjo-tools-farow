@@ -3,6 +3,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.codjo.tools.farow.command.nexus.bean.Repository;
+import net.codjo.tools.farow.util.JettyFixture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,20 +18,41 @@ import static org.junit.Assert.fail;
 /**
  *
  */
-public class NexusApiTest extends JettyFixture {
+public class NexusApiTest {
+    private JettyFixture jettyFixture;
     private NexusApi nexusApi;
+    public static final int PORT = 7777;
+    public static final String APPLICATION_XML = "application/xml";
 
 
     @Before
     public void setup() throws Exception {
+        jettyFixture = new JettyFixture(PORT) {
+            @Override
+            protected void handleHttpRequest(String target, HttpServletRequest request, HttpServletResponse response) {
+                NexusApiTest.handleHttpRequest(this, target, request, response);
+            }
+
+
+            @Override
+            protected String getRealmPropertyFile() {
+                return "/net/codjo/tools/farow/command/nexus/jettyRealm.properties";
+            }
+
+
+            @Override
+            protected String[] getRoles() {
+                return new String[]{"user", "admin", "moderator"};
+            }
+        };
+        jettyFixture.doSetUp();
         nexusApi = new NexusApi("http://localhost:" + PORT + "/", "admin", "admin");
-        super.doSetup();
     }
 
 
     @After
     public void tearDown() throws Exception {
-        super.doTearDown();
+        jettyFixture.doTearDown();
     }
 
 
@@ -73,7 +95,7 @@ public class NexusApiTest extends JettyFixture {
     }
 
 
-    private String getMockedResponse(String repositoryId) {
+    private static String getMockedResponse(String repositoryId) {
 
         return "<repository>\n"
                + " <data>\n"
@@ -106,7 +128,7 @@ public class NexusApiTest extends JettyFixture {
     }
 
 
-    private String getMockResultForRunSchedule() {
+    private static String getMockResultForRunSchedule() {
         return " <schedule-service-status>\n"
                + " <data>\n"
                + " <resource>\n"
@@ -138,7 +160,7 @@ public class NexusApiTest extends JettyFixture {
     }
 
 
-    private String getMockScheduleList() {
+    private static String getMockScheduleList() {
         return "<schedules-list>\n"
                + "  <data>\n"
                + "    <schedules-list-item>\n"
@@ -206,10 +228,9 @@ public class NexusApiTest extends JettyFixture {
     }
 
 
-    @Override
-    protected void handleHttpRequest(String target,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response) {
+    private static void handleHttpRequest(JettyFixture jettyFixture, String target,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response) {
 
         String[] urls = target.split("/");
         String repositoryId = urls[urls.length - 1];
@@ -231,7 +252,11 @@ public class NexusApiTest extends JettyFixture {
                     response.getWriter().close();
                 }
                 if ("PUT".equals(request.getMethod())) {
-                    response.getWriter().print(decode(request));
+                    response.getWriter().print(jettyFixture.decode(request));
+                    response.getWriter().close();
+                }
+                if ("DELETE".equals(request.getMethod())) {
+                    response.getWriter().print(jettyFixture.decode(request));
                     response.getWriter().close();
                 }
                 response.setStatus(HttpServletResponse.SC_OK);

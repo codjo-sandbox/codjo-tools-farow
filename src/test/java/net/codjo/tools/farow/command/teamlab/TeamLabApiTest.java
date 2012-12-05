@@ -2,7 +2,7 @@ package net.codjo.tools.farow.command.teamlab;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.codjo.tools.farow.command.nexus.JettyFixture;
+import net.codjo.tools.farow.util.JettyFixture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,32 +10,36 @@ import org.mortbay.jetty.Request;
 
 import static net.codjo.test.common.matcher.JUnitMatchers.*;
 
-public class TeamLabApiTest extends JettyFixture {
+public class TeamLabApiTest {
+    public static final int PORT = 7777;
+    public static final String APPLICATION_XML = "application/xml";
+    private JettyFixture jettyFixture;
+
     private static final String FAKE_TOKEN = "sdjhfskjdhkqy739459234";
-    private String allEvents = "";
+    private static String allEvents = "";
 
 
     @Before
     public void setup() throws Exception {
-        super.doSetup();
+        jettyFixture = new JettyFixture(PORT) {
+            @Override
+            protected void handleHttpRequest(String target, HttpServletRequest request, HttpServletResponse response) {
+                TeamLabApiTest.handleHttpRequest(jettyFixture, target, request, response);
+            }
+        };
+        jettyFixture.doSetUp();
     }
 
 
     @After
     public void tearDown() throws Exception {
-        super.doTearDown();
-    }
-
-
-    @Override
-    protected String[] getRoles() {
-        return null;
+        jettyFixture.doTearDown();
     }
 
 
     @Test
     public void test_teamLabApi() throws IOException {
-        TeamLabApi api = new TeamLabApi("http://localhost:"+PORT, "admin", "admin", null);
+        TeamLabApi api = new TeamLabApi("http://localhost:" + PORT, "admin", "admin", null);
 
         assertThat(api.getToken(), is(FAKE_TOKEN));
         assertThat(api.getAllEvents(), is(""));
@@ -53,8 +57,10 @@ public class TeamLabApiTest extends JettyFixture {
     }
 
 
-    @Override
-    protected void handleHttpRequest(String target, HttpServletRequest request, HttpServletResponse response) {
+    protected static void handleHttpRequest(JettyFixture jettyFixture,
+                                            String target,
+                                            HttpServletRequest request,
+                                            HttpServletResponse response) {
         try {
             if ("GET".equals(request.getMethod())) {
                 if ("/api/1.0/event".equals(target)) {
@@ -75,11 +81,11 @@ public class TeamLabApiTest extends JettyFixture {
                         throw new IllegalArgumentException("Vous n'etes pas autorisé a utiliser Teamlab api");
                     }
                     if ("/api/1.0/event".equals(target)) {
-                        allEvents = decode(request);
+                        allEvents = jettyFixture.decode(request);
                         response.getWriter().print(allEvents);
                     }
                     else {
-                        response.getWriter().print(decode(request));
+                        response.getWriter().print(jettyFixture.decode(request));
                     }
                 }
                 response.getWriter().close();
@@ -95,7 +101,7 @@ public class TeamLabApiTest extends JettyFixture {
     }
 
 
-    private String getOneEvent() {
+    private static String getOneEvent() {
         return "<result>\n"
                + "    <count>0</count>\n"
                + "    <startIndex>0</startIndex>\n"
@@ -130,12 +136,12 @@ public class TeamLabApiTest extends JettyFixture {
     }
 
 
-    private String getAllEvents() {
+    private static String getAllEvents() {
         return allEvents;
     }
 
 
-    private String getAuthenticationResult() {
+    private static String getAuthenticationResult() {
         return "<result>"
                + "<count>0</count> "
                + "<startIndex>0</startIndex>"
