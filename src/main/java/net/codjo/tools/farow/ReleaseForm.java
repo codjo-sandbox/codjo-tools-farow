@@ -366,6 +366,9 @@ public class ReleaseForm {
         player.add(new MavenCommand(ArtifactType.SUPER_POM,
                                     "",
                                     "codjo:send-announcement-to-teams"));
+        if (frameworkVersion==null){
+            frameworkVersion = JOptionPane.showInputDialog("Merci de preciser le numéro de version du framework");
+        }
         if (frameworkVersion != null && !frameworkVersion.trim().isEmpty()
             && apiUserName != null && !apiUserName.trim().isEmpty()
             && apiUserPassword != null && !apiUserPassword.trim().isEmpty()) {
