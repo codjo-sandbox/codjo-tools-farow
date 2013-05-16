@@ -48,7 +48,6 @@ import net.codjo.tools.farow.command.GetItCommand;
 import net.codjo.tools.farow.command.IdeaCommand;
 import net.codjo.tools.farow.command.LockRepoCommand;
 import net.codjo.tools.farow.command.MavenCommand;
-import net.codjo.tools.farow.command.NotifyCodjoUsersCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
 import net.codjo.tools.farow.command.RebuildNexusPomMetaDataCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
@@ -86,7 +85,6 @@ public class ReleaseForm {
     private static final File DEFAULT_BUILD_LIST_FILE = new File(System.getProperty("java.io.tmpdir"),
                                                                  "stabilisationBuildList.txt");
     private GitConfigUtil proxy;
-    private String frameworkVersion;
     private Properties properties;
 
 
@@ -316,7 +314,7 @@ public class ReleaseForm {
 
 
     private void runFinalizer() {
-        frameworkVersion = JOptionPane.showInputDialog("Merci de preciser le numéro de version du framework");
+        String frameworkVersion = JOptionPane.showInputDialog("Merci de preciser le numéro de version du framework");
         if (frameworkVersion == null || frameworkVersion.trim().isEmpty()) {
             JOptionPane.showMessageDialog(getMainPanel(),
                                           "Le numéro de version du framework ne peut etre null ou vide",
@@ -357,23 +355,10 @@ public class ReleaseForm {
 
 
     private void sendMail() {
-        //TODO recuperer la version du framework des traces maven ? ou deplacer dans codjo-maven-plugin
-        String apiUserName = JOptionPane.showInputDialog("Merci de preciser le login teamLab "
-                                                         + "(pour la notification Teamlab, parfois c'est une adresse mail):");
-        String apiUserPassword = JOptionPane.showInputDialog("Merci de preciser le password teamLab "
-                                                             + "(pour la notification Teamlab):");
         CommandPlayer player = new CommandPlayer();
         player.add(new MavenCommand(ArtifactType.SUPER_POM,
                                     "",
                                     "codjo:send-announcement-to-teams"));
-        if (frameworkVersion==null){
-            frameworkVersion = JOptionPane.showInputDialog("Merci de preciser le numéro de version du framework");
-        }
-        if (frameworkVersion != null && !frameworkVersion.trim().isEmpty()
-            && apiUserName != null && !apiUserName.trim().isEmpty()
-            && apiUserPassword != null && !apiUserPassword.trim().isEmpty()) {
-            player.add(new NotifyCodjoUsersCommand(proxy, frameworkVersion, apiUserName, apiUserPassword));
-        }
         StepInvoker invoker = new StepInvoker("Envoi du Mail", player);
         invoker.start();
     }
