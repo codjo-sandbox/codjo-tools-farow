@@ -49,7 +49,6 @@ import net.codjo.tools.farow.command.IdeaCommand;
 import net.codjo.tools.farow.command.LockRepoCommand;
 import net.codjo.tools.farow.command.MavenCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
-import net.codjo.tools.farow.command.RebuildNexusPomMetaDataCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
 import net.codjo.tools.farow.step.ArtifactStep;
 import net.codjo.tools.farow.step.Build;
@@ -72,7 +71,7 @@ public class ReleaseForm {
     private JButton removeBuildButton;
     private JTabbedPane displayTabbedPane;
     private JTextArea auditArea;
-    private JButton finalizeButton;
+    private JButton artifactManagerUpdateButton;
     private JButton broadcastButton;
     private JButton importButton;
     private JButton sendMailButton;
@@ -81,6 +80,7 @@ public class ReleaseForm {
     private JButton sortButton;
     private JButton publishButton;
     private JButton deleteRepoButton;
+    private JButton confluenceUpdateButton;
     private DefaultListModel model = new DefaultListModel();
     private static final File DEFAULT_BUILD_LIST_FILE = new File(System.getProperty("java.io.tmpdir"),
                                                                  "stabilisationBuildList.txt");
@@ -125,9 +125,15 @@ public class ReleaseForm {
             }
         });
 
-        finalizeButton.addActionListener(new ActionListener() {
+        artifactManagerUpdateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                runFinalizer();
+                runArtifactManagerUpdate();
+            }
+        });
+
+        confluenceUpdateButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                runConfluenceUpdate();
             }
         });
         sendMailButton.setMnemonic('M');
@@ -255,7 +261,6 @@ public class ReleaseForm {
                                     "-DisStarting=true"));
         player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-before-release"));
 
-        //TODO rajouter la gestion de l'option dans l'IHM ReleaseType eg -DreleaseType=patch
         player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:release",
                                     "-DstabilisationFileName=" + DEFAULT_BUILD_LIST_FILE.getAbsolutePath()));
         player.add(new ImportArtifactsCommand());
@@ -313,7 +318,7 @@ public class ReleaseForm {
     }
 
 
-    private void runFinalizer() {
+    private void runArtifactManagerUpdate() {
         String frameworkVersion = JOptionPane.showInputDialog("Merci de preciser le numéro de version du framework");
         if (frameworkVersion == null || frameworkVersion.trim().isEmpty()) {
             JOptionPane.showMessageDialog(getMainPanel(),
@@ -343,12 +348,28 @@ public class ReleaseForm {
 
             player.add(new CleanUpDirectoryCommand(temporaryLocalRepository));
             player.add(new IdeaCommand(ArtifactType.LIB, codjoPomAllDepsDirectory, temporaryLocalRepository));
-            player.add(new RebuildNexusPomMetaDataCommand(properties));
+
             player.add(new SetNexusProxySettingsCommand(null, null, properties));
+
+            StepInvoker invoker = new StepInvoker("Mise à jour du gestionnaire d'artifact", player);
+            invoker.start();
+        }
+    }
+
+
+    private void runConfluenceUpdate() {
+        final int result = JOptionPane.showConfirmDialog(getMainPanel(),
+                                                         "Merci d'expirer le cache de /net/codjo/pom sur le repository codjo-inhouse de Nexus :\n"
+                                                         + "      connection en \"admin\" --> Onglet \"Browse Storage\" --> clic droit + \"Expire Cache\"\n"
+                                                         + "\n"
+                                                         + "Cliquer sur OK quand c'est terminé",
+                                                         "Gestionnaire d'artifact",JOptionPane.OK_CANCEL_OPTION);
+        if (result == 0) {
+            CommandPlayer player = new CommandPlayer();
 
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:find-release-version"));
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-after-release"));
-            StepInvoker invoker = new StepInvoker("Finalisation", player);
+            StepInvoker invoker = new StepInvoker("Mise à jour de Confluence", player);
             invoker.start();
         }
     }
@@ -617,7 +638,8 @@ public class ReleaseForm {
 
     private void updateButtonState(boolean enable) {
         releaseButton.setEnabled(enable);
-        finalizeButton.setEnabled(enable);
+        artifactManagerUpdateButton.setEnabled(enable);
+        confluenceUpdateButton.setEnabled(enable);
         sendMailButton.setEnabled(enable);
         publishButton.setEnabled(enable);
         deleteRepoButton.setEnabled(enable);
