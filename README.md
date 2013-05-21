@@ -27,6 +27,18 @@ for example :
         </profile>
 ```
 
+How to release :
+* mvn --batch-mode codjo:switch-to-parent-release
+* mvn release:prepare
+* mvn release:perform -DconnectionUrl=scm:git:file:///C:/dev/projects/codjo/tools/codjo-tools-farow/.git -Darguments="-Dremote=codjo -Dprocess=integration" -Dprocess=integration
+* mvn --batch-mode codjo:switch-to-parent-snapshot
+* git checkout master
+* git merge integration
+* git gc
+* push.cmd
+* git push --tag
+
+
 TODO :
 * Replace hard coded paths.
 * Manage Ontologie
