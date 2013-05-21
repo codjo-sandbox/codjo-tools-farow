@@ -1,7 +1,7 @@
 package net.codjo.tools.farow.command;
 import java.net.URL;
 import javax.swing.DefaultListModel;
-import net.codjo.tools.farow.Build;
+import net.codjo.tools.farow.step.Build;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

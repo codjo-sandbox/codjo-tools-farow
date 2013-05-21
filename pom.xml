@@ -41,6 +41,10 @@
             <groupId>xstream</groupId>
             <artifactId>xstream</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jdom</groupId>
+            <artifactId>jdom</artifactId>
+        </dependency>
         <!-- LOGGING DEPENDENCIES - LOG4J -->
         <dependency>
             <groupId>org.slf4j</groupId>

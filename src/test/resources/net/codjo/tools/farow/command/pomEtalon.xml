@@ -3,52 +3,11 @@
     <!-- POM's layout - http://www.javaworld.com/javaworld/jw-05-2006/jw-0529-maven.html -->
 
     <modelVersion>4.0.0</modelVersion>
-
-    <!--
-     | POM Relationships
-     -->
-
     <groupId>net.codjo.pom</groupId>
     <artifactId>codjo-pom-alldeps</artifactId>
     <version>SNAPSHOT</version>
 
     <dependencies>
-        <dependency>
-            <groupId>net.codjo.pom</groupId>
-            <artifactId>codjo-pom</artifactId>
-            <version>2.24</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>net.codjo.pom</groupId>
-            <artifactId>codjo-pom-agif</artifactId>
-            <version>2.24</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>net.codjo.pom</groupId>
-            <artifactId>codjo-pom-application</artifactId>
-            <version>2.24</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>net.codjo.pom</groupId>
-            <artifactId>codjo-pom-library</artifactId>
-            <version>2.24</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>net.codjo.pom</groupId>
-            <artifactId>codjo-pom-plugin</artifactId>
-            <version>2.24</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>net.codjo.pom</groupId>
-            <artifactId>codjo-pom-external</artifactId>
-            <version>2.24</version>
-            <type>pom</type>
-        </dependency>
         <!-- ******* Externe -->
         <dependency>
             <groupId>jfree</groupId>
@@ -752,6 +711,48 @@
             <artifactId>codjo-referential-server</artifactId>
             <version>1.66</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.codjo.maven.mojo</groupId>
+            <artifactId>maven-codjo-plugin</artifactId>
+            <version>1.51</version>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.pom</groupId>
+            <artifactId>codjo-pom</artifactId>
+            <version>2.24</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.pom</groupId>
+            <artifactId>codjo-pom-agif</artifactId>
+            <version>2.24</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.pom</groupId>
+            <artifactId>codjo-pom-application</artifactId>
+            <version>2.24</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.pom</groupId>
+            <artifactId>codjo-pom-library</artifactId>
+            <version>2.24</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.pom</groupId>
+            <artifactId>codjo-pom-plugin</artifactId>
+            <version>2.24</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.pom</groupId>
+            <artifactId>codjo-pom-external</artifactId>
+            <version>2.24</version>
+            <type>pom</type>
+        </dependency>
     </dependencies>
     <modules>
         <module>codjo-pom-external</module>
@@ -774,7 +775,33 @@
                 <plugin>
                     <groupId>net.codjo.maven.mojo</groupId>
                     <artifactId>maven-codjo-plugin</artifactId>
-                    <version>1.47</version>
+                    <version>1.51</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.scm</groupId>
+                            <artifactId>maven-scm-provider-git-commons</artifactId>
+                            <version>1.0-agf</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.maven.scm</groupId>
+                            <artifactId>maven-scm-provider-gitexe</artifactId>
+                            <version>1.0-agf</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>javac2</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <fork>true</fork>
+                        <debug>true</debug>
+                        <verbose>true</verbose>
+                        <failOnError>true</failOnError>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

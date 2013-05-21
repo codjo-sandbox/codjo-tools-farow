@@ -1,5 +1,6 @@
 package net.codjo.tools.farow.command;
 import java.io.IOException;
+import net.codjo.tools.farow.Display;
 /**
  *
  */

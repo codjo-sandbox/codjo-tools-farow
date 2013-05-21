@@ -1,4 +1,4 @@
-package net.codjo.tools.farow;
+package net.codjo.tools.farow.step;
 import java.util.Properties;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CommandPlayer;
@@ -11,6 +11,12 @@ public class Publish extends ArtifactStep {
 
     public Publish(Build build, Properties properties) {
         super(build.getType(), build.getName(), createPlayer(build.getType(), build.getName(), properties));
+    }
+
+
+    @Override
+    public String getAuditMessage() {
+        return "Publication";
     }
 
 
@@ -27,11 +33,5 @@ public class Publish extends ArtifactStep {
     @Override
     protected State getFinishingState() {
         return State.TO_BE_DELETED;
-    }
-
-
-    @Override
-    protected String getAuditMessage() {
-        return "Publication";
     }
 }
