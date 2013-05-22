@@ -1,5 +1,6 @@
 package net.codjo.tools.farow.command;
 
+import net.codjo.tools.farow.Display;
 public class CleanInhouseSnapshot extends Command {
     public CleanInhouseSnapshot() {
         super("Nettoyage du repo snapshot");

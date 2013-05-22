@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import net.codjo.tools.farow.Build;
+import net.codjo.tools.farow.step.Build;
 import net.codjo.util.file.FileUtil;
 /**
  *
@@ -44,11 +44,11 @@ public class ArtifactSorter {
     }
 
 
-    static Build[] sortBuildList(Build[] builds, String[] completSortedList) throws IOException {
-        final Map<String, Integer> artifactMap = new HashMap<String, Integer>(completSortedList.length);
+    static Build[] sortBuildList(Build[] builds, String[] completeSortedList) throws IOException {
+        final Map<String, Integer> artifactMap = new HashMap<String, Integer>(completeSortedList.length);
 
-        for (int i = 0; i < completSortedList.length; i++) {
-            String artifact = completSortedList[i];
+        for (int i = 0; i < completeSortedList.length; i++) {
+            String artifact = completeSortedList[i];
             artifactMap.put(artifact, i);
         }
 

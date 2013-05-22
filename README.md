@@ -27,6 +27,18 @@ for example :
         </profile>
 ```
 
+How to release :
+* mvn --batch-mode codjo:switch-to-parent-release
+* mvn release:prepare
+* mvn release:perform -DconnectionUrl=scm:git:file:///C:/dev/projects/codjo/tools/codjo-tools-farow/.git -Darguments="-Dremote=codjo -Dprocess=integration" -Dprocess=integration
+* mvn --batch-mode codjo:switch-to-parent-snapshot
+* git checkout master
+* git merge integration
+* git gc
+* push.cmd
+* git push --tag
+
+
 TODO :
 * Replace hard coded paths.
 * Manage Ontologie
@@ -41,3 +53,6 @@ TODO :
    - verify pull requests before starting stabilisation
    - forked project deletion
    - refork super-pom at the end of the process
+* Bug : si on clique sur "Annuler" on a un warning le numéro de version ne doit pas être null...
+* Feature : voir si on peut utiliser Nexus pour verifier les download des artifacts avec les bonne versions.
+* Feature : nertc plus obligatoire avec github

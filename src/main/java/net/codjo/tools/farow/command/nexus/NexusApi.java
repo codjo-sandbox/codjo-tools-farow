@@ -15,43 +15,86 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
+import static net.codjo.tools.farow.command.nexus.DomUtil.buildDocument;
+import static net.codjo.tools.farow.command.nexus.DomUtil.extractNodeByXpath;
 /**
  *
  */
 public class NexusApi {
     static final String CHARSET = "UTF-8";
     static final String SERVICE_URL = "nexus/service/local/repositories/";
+    static final String SCHEDULE_TASK_RUN_URL = "nexus/service/local/schedule_run/";
+    static final String SCHEDULE_TASK_LIST_URL = "nexus/service/local/schedules/";
     static final String PROXY_HOST = "ehttp1";
     static final int PROXY_PORT = 80;
     private String url;
+    private String hostUrl;
+    private String apiUserName;
+    private String apiPassword;
 
 
-    public NexusApi(String hostUrl) {
-        this.url = NexusApi.getRepositoryServiceUrl(hostUrl, NexusApi.SERVICE_URL);
+    public NexusApi(String hostUrl, String apiUserName, String apiPassword) {
+        this.hostUrl = hostUrl;
+        this.apiUserName = apiUserName;
+        this.apiPassword = apiPassword;
+        this.url = NexusApi.getRepositoryServiceUrl(this.hostUrl, NexusApi.SERVICE_URL);
     }
 
 
-    public Repository getRepository(String repositoryId, String apiUserName, String apiPassword)
-          throws Exception {
+    public Repository getRepository(String repositoryId) throws Exception {
         HttpMethod getRepositoryHttpMethod = NexusApi.buildHttpMethod(url, false, repositoryId);
         HttpMethod httpMethod = NexusApi.executeHttpMethod(apiUserName, apiPassword, getRepositoryHttpMethod);
         return NexusApi.decodeHttpResponse(httpMethod);
     }
 
 
-    public Repository setProxySettings(String repositoryId,
-                                       String nexusAccount, String nexusPassword,
-                                       String proxyUserName, String proxyPassword)
+    public Repository setProxySettings(String repositoryId, String proxyUserName, String proxyPassword)
           throws Exception {
-        HttpProxySettings httpProxySettings = buildProxySettings(proxyUserName, proxyPassword);
-
-        return setProxySettings(repositoryId, nexusAccount, nexusPassword, httpProxySettings);
+        return setProxySettings(repositoryId, buildProxySettings(proxyUserName, proxyPassword));
     }
 
 
-    public Repository removeProxySettings(String repositoryId, String nexusAccount, String nexusPassword)
+    public Repository removeProxySettings(String repositoryId) throws Exception {
+        return setProxySettings(repositoryId, null);
+    }
+
+
+    public String runScheduledTask(String scheduledTaskId) throws Exception {
+        HttpMethod getRepositoryHttpMethod = buildHttpMethod(
+              getRepositoryServiceUrl(hostUrl, SCHEDULE_TASK_RUN_URL), false, scheduledTaskId);
+        HttpMethod httpMethod = executeHttpMethod(apiUserName, apiPassword, getRepositoryHttpMethod);
+        return getResponseAsString(httpMethod).toString();
+    }
+
+
+    public String getScheduledTaskId(String scheduledTaskName) throws Exception {
+        HttpMethod getRepositoryHttpMethod = buildHttpMethod(getRepositoryServiceUrl(hostUrl, SCHEDULE_TASK_LIST_URL),
+                                                             false,
+                                                             "");
+        HttpMethod httpMethod = executeHttpMethod(apiUserName, apiPassword, getRepositoryHttpMethod);
+        return getScheduleIdFromResponse(httpMethod, scheduledTaskName);
+    }
+
+
+    private String getScheduleIdFromResponse(HttpMethod httpMethod, String scheduledTaskName)
           throws Exception {
-        return setProxySettings(repositoryId, nexusAccount, nexusPassword, null);
+        Document document = buildDocument(httpMethod);
+        //On cherche tous les id dans les noeuds qui ont un attribut "name" avec la valeur scheduledTaskName
+        NodeList nodes = extractNodeByXpath(document,
+                                            "//schedules-list-item[name[text()='" + scheduledTaskName + "']]/id");
+
+        if (nodes.getLength() == 0) {
+            throw new Exception("Task " + scheduledTaskName + " not found in Nexus");
+        }
+
+        if (nodes.getLength() != 1) {
+            throw new Exception("Multiple Tasks have been found with the following name: " + scheduledTaskName);
+        }
+
+        return nodes.item(0).getTextContent();
     }
 
 
@@ -71,9 +114,9 @@ public class NexusApi {
     }
 
 
-    private static HttpMethod buildHttpMethod(String url, boolean isGetMethod, String repositoryId) {
+    private static HttpMethod buildHttpMethod(String url, boolean isPutMethod, String repositoryId) {
         final String uri = getRepositoryServiceUrl("http://", getHostByUrl(url + repositoryId));
-        return isGetMethod ? new PutMethod(uri) : new GetMethod(uri);
+        return isPutMethod ? new PutMethod(uri) : new GetMethod(uri);
     }
 
 
@@ -119,15 +162,12 @@ public class NexusApi {
     }
 
 
-    private Repository setProxySettings(String repositoryId,
-                                        String nexusAccount, String nexusPassword, HttpProxySettings httpProxySettings)
-          throws Exception {
-        Repository repository = getRepository(repositoryId, nexusAccount,
-                                              nexusPassword);
+    private Repository setProxySettings(String repositoryId, HttpProxySettings httpProxySettings) throws Exception {
+        Repository repository = getRepository(repositoryId);
 
         repository.getData().getRemoteStorage().setHttpProxySettings(httpProxySettings);
         HttpMethod putHttpMethod = NexusApi.buildHttpPutMethod(url, true, repository);
-        return NexusApi.decodeHttpResponse(NexusApi.executeHttpMethod(nexusAccount, nexusPassword, putHttpMethod));
+        return NexusApi.decodeHttpResponse(NexusApi.executeHttpMethod(apiUserName, apiPassword, putHttpMethod));
     }
 
 

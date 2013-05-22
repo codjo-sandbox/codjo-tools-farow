@@ -1,6 +1,6 @@
-package net.codjo.tools.farow;
+package net.codjo.tools.farow.step;
+import net.codjo.tools.farow.Display;
 import net.codjo.tools.farow.command.CommandPlayer;
-import net.codjo.tools.farow.command.Display;
 /**
  *
  */
@@ -24,7 +24,7 @@ public class Step {
     }
 
 
-    protected Step(String name, CommandPlayer player) {
+    public Step(String name, CommandPlayer player) {
         this.name = name;
         this.player = player;
     }

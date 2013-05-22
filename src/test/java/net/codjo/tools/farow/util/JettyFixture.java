@@ -1,9 +1,10 @@
-package net.codjo.tools.farow.command.nexus;
+package net.codjo.tools.farow.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.codjo.test.common.fixture.Fixture;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
@@ -12,17 +13,19 @@ import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.SecurityHandler;
-/**
- *
- */
-public abstract class JettyFixture {
-    public static final java.lang.String APPLICATION_XML = "application/xml";
-    static final String JETTY_REALM_PROPERTY_FILE = "/net/codjo/tools/farow/command/nexus/jettyRealm.properties";
+
+public abstract class JettyFixture implements Fixture {
     private Server server;
+    private int webPort;
 
 
-    public void doSetup() throws Exception {
-        server = getJettyServer(8080);
+    protected JettyFixture(int webPort) {
+        this.webPort = webPort;
+    }
+
+
+    public void doSetUp() throws Exception {
+        server = buildJettyServer(webPort);
         server.start();
     }
 
@@ -75,22 +78,22 @@ public abstract class JettyFixture {
     }
 
 
-    private Server getJettyServer(int port) throws IOException {
-        Server server = new Server();
+    private Server buildJettyServer(int port) throws IOException {
+        Server newServer = new Server();
         SocketConnector connector = new SocketConnector();
 
         // Set some timeout options to make debugging easier.
         connector.setMaxIdleTime(1000 * 60 * 60);
         connector.setSoLingerTime(-1);
         connector.setPort(port);
-        server.setConnectors(new Connector[]{connector});
+        newServer.setConnectors(new Connector[]{connector});
 
         String[] roles = getRoles();
         if (roles != null && roles.length != 0) {
-            addSecurityContext(server, roles,
-                               getClass().getResource(JETTY_REALM_PROPERTY_FILE).getPath());
+            addSecurityContext(newServer, roles,
+                               getClass().getResource(getRealmPropertyFile()).getPath());
         }
-        server.addHandler(new AbstractHandler() {
+        newServer.addHandler(new AbstractHandler() {
             public void handle(String target,
                                HttpServletRequest httpServletRequest,
                                HttpServletResponse httpServletResponse,
@@ -99,11 +102,16 @@ public abstract class JettyFixture {
                 handleHttpRequest(target, httpServletRequest, httpServletResponse);
             }
         });
-        return server;
+        return newServer;
+    }
+
+
+    protected String getRealmPropertyFile() {
+        return "jettyRealm.properties";
     }
 
 
     protected String[] getRoles() {
-        return new String[]{"user", "admin", "moderator"};
+        return null;
     }
 }

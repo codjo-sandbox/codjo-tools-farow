@@ -1,4 +1,4 @@
-package net.codjo.tools.farow;
+package net.codjo.tools.farow.step;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CleanUpDirectoryCommand;
 import net.codjo.tools.farow.command.CommandPlayer;
@@ -14,6 +14,12 @@ public class Build extends ArtifactStep {
     }
 
 
+    @Override
+    public String getAuditMessage() {
+        return "Stabilisation";
+    }
+
+
     protected static CommandPlayer createPlayer(ArtifactType type, String name) {
         CommandPlayer player = new CommandPlayer();
 
@@ -25,16 +31,9 @@ public class Build extends ArtifactStep {
         player.add(new MavenCommand(type, name, "codjo:switch-to-parent-release"));
         player.add(new MavenCommand(type, name, "release:prepare"));
         player.add(new MavenCommand(type, name, "release:perform",
-                                    getGitScmAdditionalParameter(type, name),
-                                    getCodjoDeploymentParameter(type)));
+                                    getGitScmAdditionalParameter(type, name), getCodjoDeploymentParameter()));
         player.add(new MavenCommand(type, name, "codjo:switch-to-parent-snapshot"));
 
         return player;
-    }
-
-
-    @Override
-    protected String getAuditMessage() {
-        return "Stabilisation";
     }
 }
