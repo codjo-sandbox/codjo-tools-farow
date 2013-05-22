@@ -129,6 +129,7 @@
                         <groupId>net.codjo.maven.mojo</groupId>
                         <artifactId>maven-config-plugin</artifactId>
                     </plugin>
+                    <!-- 22/05/2013: impossible de deployer par ssh sur wp-documentation
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <dependencies>
@@ -189,6 +190,7 @@
                             </execution>
                         </executions>
                     </plugin>
+                    -->
                 </plugins>
             </build>
         </profile>
