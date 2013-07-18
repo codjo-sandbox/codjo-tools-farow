@@ -56,6 +56,6 @@ TODO :
    - verify pull requests before starting stabilisation
    - forked project deletion
    - refork super-pom at the end of the process
-* Bug : si on clique sur "Annuler" on a un warning le num�ro de version ne doit pas �tre null...
+* Bug : si on clique sur "Annuler" on a un warning le numéro de version ne doit pas être null...
 * Feature : voir si on peut utiliser Nexus pour verifier les download des artifacts avec les bonne versions.
 * Feature : nertc plus obligatoire avec github

@@ -359,11 +359,16 @@ public class ReleaseForm {
 
     private void runConfluenceUpdate() {
         final int result = JOptionPane.showConfirmDialog(getMainPanel(),
-                                                         "Merci d'expirer le cache de /net/codjo/pom sur le repository codjo-inhouse de Nexus :\n"
-                                                         + "      connection en \"admin\" --> Onglet \"Browse Storage\" --> clic droit + \"Expire Cache\"\n"
-                                                         + "\n"
-                                                         + "Cliquer sur OK quand c'est terminé",
-                                                         "Gestionnaire d'artifact",JOptionPane.OK_CANCEL_OPTION);
+                                                         "\nSe connecter en tant qu''admin'\n"
+                                                         + "Cliquer sur le menu 'Repositories'\n"
+                                                         + "Sélectionner 'codjo-inhouse'\n"
+                                                         + "Ouvrir le proxy (onglet 'Configuration')\n"
+                                                         + "Sélectionner l'artifact /net/codjo/pom (onglet 'Browse Storage')\n"
+                                                         + "Faire Clic droit 'Expire Cache'\n\n"
+                                                         + "Cliquer sur OK quand c'est terminé\n\n"
+                                                         + "ATTENTION : penser à refermer le proxy après la mise à jour de Confluence\n\n",
+                                                         "Nexus - Gestionnaire d'artifact : expiration du cache",
+                                                         JOptionPane.OK_CANCEL_OPTION);
         if (result == 0) {
             CommandPlayer player = new CommandPlayer();
 
