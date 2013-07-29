@@ -40,6 +40,8 @@ How to release :
 * git gc
 * push.cmd
 * git push --tag
+* switch your netrc
+* delete the forked repository
 
 
 TODO :
