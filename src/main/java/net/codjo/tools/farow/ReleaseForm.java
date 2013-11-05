@@ -329,7 +329,6 @@ public class ReleaseForm {
         else {
             CommandPlayer player = new CommandPlayer();
             player.add(new CleanUpDirectoryCommand("C:\\Dev\\platform\\tools\\maven\\local\\maven2\\net\\codjo\\pom"));
-            player.add(new LockRepoCommand());
             player.add(new CleanInhouseSnapshot());
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "deploy"));
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "deploy", ArtifactStep.REMOTE_CODJO));
