@@ -46,7 +46,6 @@ import net.codjo.tools.farow.command.CommandPlayer;
 import net.codjo.tools.farow.command.CopyPomCommand;
 import net.codjo.tools.farow.command.GetItCommand;
 import net.codjo.tools.farow.command.IdeaCommand;
-import net.codjo.tools.farow.command.LockRepoCommand;
 import net.codjo.tools.farow.command.MavenCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
@@ -251,28 +250,36 @@ public class ReleaseForm {
 
 
     private void warnPrepareAndRelaseSuperPom() {
-        prepareButton.setEnabled(false);
-        CommandPlayer player = new CommandPlayer();
+        final int result = JOptionPane.showConfirmDialog(getMainPanel(),
+                                                         "Les étapes ci-dessous ont-elles été faites :   \n"
+                                                         + "- ajout de la \"pool request\" du super-pom,  \n"
+                                                         + "- validation de toutes les \"pool request\"?  \n\n",
+                                                         "Github - Pool Request",
+                                                         JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (result == 0) {
+            prepareButton.setEnabled(false);
+            CommandPlayer player = new CommandPlayer();
 
-        player.add(new CleanUpDirectoryCommand(ArtifactType.SUPER_POM, ArtifactType.SUPER_POM.name()));
-        player.add(new GetItCommand(ArtifactType.SUPER_POM, ""));
+            player.add(new CleanUpDirectoryCommand(ArtifactType.SUPER_POM, ArtifactType.SUPER_POM.name()));
+            player.add(new GetItCommand(ArtifactType.SUPER_POM, ""));
 
-        player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:send-announcement-to-teams",
-                                    "-DisStarting=true"));
-        player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-before-release"));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:send-announcement-to-teams",
+                                        "-DisStarting=true"));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-before-release"));
 
-        player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:release",
-                                    "-DstabilisationFileName=" + DEFAULT_BUILD_LIST_FILE.getAbsolutePath()));
-        player.add(new ImportArtifactsCommand());
-        player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "release:prepare",
-                                    "-Ddocumentation=disabled"));
-        player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "release:perform",
-                                    "-Ddocumentation=disabled",
-                                    ArtifactStep.getGitScmAdditionalParameter(ArtifactType.SUPER_POM, "unused"),
-                                    ArtifactStep.getCodjoDeploymentParameter()));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:release",
+                                        "-DstabilisationFileName=" + DEFAULT_BUILD_LIST_FILE.getAbsolutePath()));
+            player.add(new ImportArtifactsCommand());
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "release:prepare",
+                                        "-Ddocumentation=disabled"));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "release:perform",
+                                        "-Ddocumentation=disabled",
+                                        ArtifactStep.getGitScmAdditionalParameter(ArtifactType.SUPER_POM, "unused"),
+                                        ArtifactStep.getCodjoDeploymentParameter()));
 
-        StepInvoker invoker = new StepInvoker("Premières étapes", player);
-        invoker.start();
+            StepInvoker invoker = new StepInvoker("Premières étapes", player);
+            invoker.start();
+        }
     }
 
 
