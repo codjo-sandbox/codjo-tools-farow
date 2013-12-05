@@ -46,7 +46,6 @@ import net.codjo.tools.farow.command.CommandPlayer;
 import net.codjo.tools.farow.command.CopyPomCommand;
 import net.codjo.tools.farow.command.GetItCommand;
 import net.codjo.tools.farow.command.IdeaCommand;
-import net.codjo.tools.farow.command.LockRepoCommand;
 import net.codjo.tools.farow.command.MavenCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
