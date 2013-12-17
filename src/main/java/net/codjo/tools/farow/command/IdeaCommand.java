@@ -14,7 +14,7 @@ public class IdeaCommand extends Command {
 
     @Override
     public void execute(Display display) throws Exception {
-        executeIt(display, artifactType.getCodjoCommand(), name,
+        executeIt(display, artifactType.getCodjoCommand(), name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory(),
                   "&", "idea.cmd", "-Dmaven.repo.local=" + temporaryLocalRepository);
         if (buildFailure) {
             throw new IOException("push en erreur !");

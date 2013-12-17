@@ -17,7 +17,7 @@ public class MavenCommand extends Command {
     public MavenCommand(ArtifactType artifactType, String libName, String mavenPhase, String... parameters) {
         super("execute mvn " + buildMavenPhase(mavenPhase, CODJO_PLUGIN_PREFIX), artifactType, libName);
         this.mavenPhase = buildMavenPhase(mavenPhase, CODJO_PLUGIN_PREFIX);
-        this.commands = new String[]{artifactType.getCodjoCommand(), name,
+        this.commands = new String[]{artifactType.getCodjoCommand(), name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory(),
                                      "&",
                                      "mvn", "--batch-mode", "--fail-fast", this.mavenPhase};
         if (parameters != null) {

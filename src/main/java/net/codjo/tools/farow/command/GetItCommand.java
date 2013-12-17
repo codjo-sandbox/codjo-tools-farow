@@ -22,7 +22,7 @@ public class GetItCommand extends Command {
             throw new IOException("Le répertoire existe déjà.");
         }
 
-        executeItInteractif(display, new String[]{artifactType.getCodjoCommand(), name}, "y");
+        executeItInteractif(display, new String[]{artifactType.getCodjoCommand(),name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory()}, "y");
 
         if (buildFailure) {
             throw new IOException("Récupération de " + artifactType + " " + name + " en erreur !");

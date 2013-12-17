@@ -19,7 +19,7 @@ public class GithubPublishCommand extends Command {
               "copy", "/Y", "%USERPROFILE%\\_netrc", "%USERPROFILE%\\_netrc_backup", "&",
               "echo", "machine", "github.com", "login", githubAccount, "password", githubPassword, ">",
               "%USERPROFILE%\\_netrc", "&",
-              artifactType.getCodjoCommand(), name, "&",
+              artifactType.getCodjoCommand(), name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory(), "&",
               "git", "checkout", "master", "&",
               "git", "merge", "integration", "&",
               "git", "gc", "&",

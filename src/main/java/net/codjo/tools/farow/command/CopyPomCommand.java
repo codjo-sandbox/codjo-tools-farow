@@ -10,7 +10,8 @@ public class CopyPomCommand extends Command {
 
     public CopyPomCommand(ArtifactType artifactType, String libName, String destinationDirectory) {
         super("copy super-pom command ", artifactType, libName);
-        this.commands = new String[]{artifactType.getCodjoCommand(), name, "&",
+        this.commands = new String[]{artifactType.getCodjoCommand(), name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory(),
+                                     "&",
                                      "xcopy",
                                      "/E", "/Y", "/I", ".", destinationDirectory};
     }
