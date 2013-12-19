@@ -1,5 +1,6 @@
 package net.codjo.tools.farow.util;
 import java.io.File;
+import java.util.Properties;
 import net.codjo.test.common.fixture.DirectoryFixture;
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +29,8 @@ public class GitConfigUtilTest {
 
     @Test
     public void test_gitConfig() throws Exception {
-        GitConfigUtil gitConfig = new GitConfigUtil(new File(getClass().getResource(".gitconfig").toURI()));
+        GitConfigUtil gitConfig = new GitConfigUtil(new File(getClass().getResource(".gitconfig").toURI()),
+                                                    new Properties());
 
         assertThat(gitConfig.getProxyUserName(), equalTo("GROUPE\\MARCONA"));
         assertThat(gitConfig.getProxyPassword(), equalTo("GLOUGLOU"));

@@ -85,6 +85,8 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
         Namespace namespace = rootElement.getNamespace();
         Element dependencies = rootElement.getChild("dependencies", namespace);
 
+        removeNonCodjoDependencies(dependencies);
+
         addSuperPomModulesAsDependencies(dependencies, frameworkVersion);
         addPluginsAsDependencies(document, dependencies);
         addTypeToClassifierInDependencies(dependencies, "xml", "datagen");
@@ -155,6 +157,10 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
         addTypeOnFilter(dependencies, type, new DependencyFilter(groupId, artifactId, withClassifier));
     }
 
+    private static void removeNonCodjoDependencies(Element dependencies) {
+        dependencies.removeContent(new ExternalDependencyFilter());
+    }
+
 
     private static void addTypeOnFilter(Element dependencies, String type, Filter filter) {
         Iterator plugins = dependencies.getDescendants(filter);
@@ -169,6 +175,25 @@ public class PrepareAPomToLoadSuperPomDependenciesCommand extends Command {
     }
 
 
+    private static class ExternalDependencyFilter implements Filter {
+        @SuppressWarnings({"UseOfSystemOutOrSystemErr"})
+        public boolean matches(Object obj) {
+            if (obj instanceof Element) {
+                Element element = (Element)obj;
+                if (element.getName().matches("dependency")) {
+                    Element elementGroupId = element.getChild("groupId", element.getNamespace());
+                    if (elementGroupId != null && !elementGroupId.getValue().startsWith(NET_CODJO_PREFIX)
+                        && !"org.crossbowlabs".equalsIgnoreCase(elementGroupId.getValue())) {
+                        System.out
+                              .println("\tfiltering dependency " + elementGroupId.getValue() + ":"
+                                       + element.getChild("artifactId", element.getNamespace()).getValue());
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
     private static class CodjoPluginFilter implements Filter {
         public boolean matches(Object obj) {
             if (obj instanceof Element) {

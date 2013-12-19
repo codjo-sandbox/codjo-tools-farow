@@ -1,6 +1,7 @@
 package net.codjo.tools.farow.util;
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 import net.codjo.util.file.FileUtil;
 
 import static java.lang.System.getProperty;
@@ -12,14 +13,16 @@ public class GitConfigUtil {
     private String proxyPasword;
     private String proxyHost;
     private int proxyPort;
+    private String githubAccount;
+    private String githubPassword;
 
 
-    public GitConfigUtil() throws IOException {
-        this(new File(getUserHome(), ".gitconfig"));
+    public GitConfigUtil(Properties properties) throws IOException {
+        this(new File(getUserHome(), ".gitconfig"), properties);
     }
 
 
-    public GitConfigUtil(File file) throws IOException {
+    public GitConfigUtil(File file, Properties properties) throws IOException {
         String[] gitConfigFile = FileUtil.loadContentAsLines(file);
         boolean categoryFound = false;
 
@@ -50,6 +53,9 @@ public class GitConfigUtil {
                 }
             }
         }
+
+        githubAccount = properties.getProperty("githubAccount");
+        githubPassword = properties.getProperty("githubPassword");
     }
 
 
@@ -73,6 +79,11 @@ public class GitConfigUtil {
     }
 
 
+    public String getGithubAccount() {
+        return githubAccount;
+    }
+
+
     static String removeDuplicatesBackSlashes(String s) {
         StringBuilder noDupes = new StringBuilder();
         String[] split = s.split("\\\\");
@@ -92,5 +103,10 @@ public class GitConfigUtil {
 
     private static File getUserHome() {
         return new File(getProperty("user.home"));
+    }
+
+
+    public String getGithubPassword() {
+        return githubPassword;
     }
 }

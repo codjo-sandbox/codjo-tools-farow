@@ -1,6 +1,7 @@
 package net.codjo.tools.farow.command;
 import java.io.IOException;
 import net.codjo.tools.farow.Display;
+import net.codjo.tools.farow.util.GitConfigUtil;
 /**
  *
  */
@@ -8,11 +9,13 @@ public class CopyPomCommand extends Command {
     private String[] commands;
 
 
-    public CopyPomCommand(ArtifactType artifactType, String libName, String destinationDirectory) {
+    public CopyPomCommand(ArtifactType artifactType, String libName, String targetDirectory, GitConfigUtil configUtil) {
         super("copy super-pom command ", artifactType, libName);
-        this.commands = new String[]{artifactType.getCodjoCommand(), name, "&",
+        this.commands = new String[]{artifactType.getCodjoCommand(), name, configUtil.getGithubAccount(),
+                                     artifactType.getWorkingDirectory(),
+                                     "&",
                                      "xcopy",
-                                     "/E", "/Y", "/I", ".", destinationDirectory};
+                                     "/E", "/Y", "/I", ".", targetDirectory};
     }
 
 
