@@ -2,15 +2,18 @@ package net.codjo.tools.farow.command;
 import java.io.File;
 import java.io.IOException;
 import net.codjo.tools.farow.Display;
+import net.codjo.tools.farow.util.GitConfigUtil;
 /**
  *
  */
 public class GetItCommand extends Command {
     private boolean fileAlreadyExist = false;
+    private GitConfigUtil gitConfigUtil;
 
 
-    public GetItCommand(ArtifactType type, String name) {
+    public GetItCommand(ArtifactType type, String name, GitConfigUtil gitConfigUtil) {
         super("Récupération de " + type + " " + name, type, name);
+        this.gitConfigUtil = gitConfigUtil;
     }
 
 
@@ -22,7 +25,10 @@ public class GetItCommand extends Command {
             throw new IOException("Le répertoire existe déjà.");
         }
 
-        executeItInteractif(display, new String[]{artifactType.getCodjoCommand(),name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory()}, "y");
+        executeItInteractif(display,
+                            new String[]{artifactType.getCodjoCommand(), name, gitConfigUtil.getGithubAccount(),
+                                         artifactType.getWorkingDirectory()},
+                            "y");
 
         if (buildFailure) {
             throw new IOException("Récupération de " + artifactType + " " + name + " en erreur !");

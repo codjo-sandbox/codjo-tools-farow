@@ -83,14 +83,14 @@ public class ReleaseForm {
     private DefaultListModel model = new DefaultListModel();
     private static final File DEFAULT_BUILD_LIST_FILE = new File(System.getProperty("java.io.tmpdir"),
                                                                  "stabilisationBuildList.txt");
-    private GitConfigUtil proxy;
+    private GitConfigUtil gitConfig;
     private Properties properties;
 
 
     public ReleaseForm(Properties properties) {
         this.properties = properties;
         appendAuditRow("Ouverture de farow");
-        initProxyInformation();
+        initGitConfig(properties);
 
         initializeBuildListPanel();
 
@@ -152,9 +152,9 @@ public class ReleaseForm {
     }
 
 
-    private void initProxyInformation() {
+    private void initGitConfig(Properties properties) {
         try {
-            proxy = new GitConfigUtil();
+            gitConfig = new GitConfigUtil(properties);
         }
         catch (IOException e) {
             ErrorDialog.show(getMainPanel(),
@@ -261,18 +261,21 @@ public class ReleaseForm {
             CommandPlayer player = new CommandPlayer();
 
             player.add(new CleanUpDirectoryCommand(ArtifactType.SUPER_POM, ArtifactType.SUPER_POM.name()));
-            player.add(new GetItCommand(ArtifactType.SUPER_POM, ""));
+            player.add(new GetItCommand(ArtifactType.SUPER_POM, "", gitConfig));
 
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:send-announcement-to-teams",
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "codjo:send-announcement-to-teams",
                                         "-DisStarting=true"));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-before-release"));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM,
+                                        "",
+                                        gitConfig,
+                                        "codjo:update-confluence-before-release"));
 
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:release",
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "codjo:release",
                                         "-DstabilisationFileName=" + DEFAULT_BUILD_LIST_FILE.getAbsolutePath()));
             player.add(new ImportArtifactsCommand());
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "release:prepare",
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "release:prepare",
                                         "-Ddocumentation=disabled"));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "release:perform",
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "release:perform",
                                         "-Ddocumentation=disabled",
                                         ArtifactStep.getGitScmAdditionalParameter(ArtifactType.SUPER_POM, "unused"),
                                         ArtifactStep.getCodjoDeploymentParameter()));
@@ -337,11 +340,11 @@ public class ReleaseForm {
             CommandPlayer player = new CommandPlayer();
             player.add(new CleanUpDirectoryCommand("C:\\Dev\\platform\\tools\\maven\\local\\maven2\\net\\codjo\\pom"));
             player.add(new CleanInhouseSnapshot());
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "deploy"));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "deploy", ArtifactStep.REMOTE_CODJO));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "deploy"));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "deploy", ArtifactStep.REMOTE_CODJO));
             // Rapatriement des librairies postées sur repo.codjo.net avec maven et nexus
-            player.add(new SetNexusProxySettingsCommand(proxy.getProxyUserName(),
-                                                        proxy.getProxyPassword(),
+            player.add(new SetNexusProxySettingsCommand(gitConfig.getProxyUserName(),
+                                                        gitConfig.getProxyPassword(),
                                                         properties));
 
             String codjoPomAllDepsDirectory = "pom-alldeps";
@@ -349,11 +352,14 @@ public class ReleaseForm {
             String temporaryLocalRepository = ArtifactType.LIB.toArtifactPath("repo");
 
             player.add(new CleanUpDirectoryCommand(codjoPomAllDepsPath));
-            player.add(new CopyPomCommand(ArtifactType.SUPER_POM, "", codjoPomAllDepsPath));
+            player.add(new CopyPomCommand(ArtifactType.SUPER_POM, "", codjoPomAllDepsPath, gitConfig));
             player.add(new PrepareAPomToLoadSuperPomDependenciesCommand(codjoPomAllDepsPath, frameworkVersion));
 
             player.add(new CleanUpDirectoryCommand(temporaryLocalRepository));
-            player.add(new IdeaCommand(ArtifactType.LIB, codjoPomAllDepsDirectory, temporaryLocalRepository));
+            player.add(new IdeaCommand(ArtifactType.LIB,
+                                       codjoPomAllDepsDirectory,
+                                       temporaryLocalRepository,
+                                       gitConfig));
 
             player.add(new SetNexusProxySettingsCommand(null, null, properties));
 
@@ -378,8 +384,11 @@ public class ReleaseForm {
         if (result == 0) {
             CommandPlayer player = new CommandPlayer();
 
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:find-release-version"));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", "codjo:update-confluence-after-release"));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "codjo:find-release-version"));
+            player.add(new MavenCommand(ArtifactType.SUPER_POM,
+                                        "",
+                                        gitConfig,
+                                        "codjo:update-confluence-after-release"));
             StepInvoker invoker = new StepInvoker("Mise à jour de Confluence", player);
             invoker.start();
         }
@@ -390,6 +399,7 @@ public class ReleaseForm {
         CommandPlayer player = new CommandPlayer();
         player.add(new MavenCommand(ArtifactType.SUPER_POM,
                                     "",
+                                    gitConfig,
                                     "codjo:send-announcement-to-teams"));
         StepInvoker invoker = new StepInvoker("Envoi du Mail", player);
         invoker.start();
@@ -411,11 +421,11 @@ public class ReleaseForm {
 
                 if (tmpBuild.getState() == State.TO_BE_PUBLISHED) {
                     model.removeElement(tmpBuild);
-                    model.addElement(new Publish(tmpBuild, properties));
+                    model.addElement(new Publish(tmpBuild, gitConfig));
                 }
             }
             if (!pomFound) {
-                model.add(0, new Publish(new Build(ArtifactType.LIB, "pom"), properties));
+                model.add(0, new Publish(new Build(ArtifactType.LIB, "pom", gitConfig), gitConfig));
             }
         }
     }
@@ -478,7 +488,7 @@ public class ReleaseForm {
                 artifactType = ArtifactType.ONTOLOGIE;
             }
 
-            builds.add(new Build(artifactType, words[1]));
+            builds.add(new Build(artifactType, words[1], gitConfig));
             line = bufferedReader.readLine();
         }
 
@@ -551,7 +561,7 @@ public class ReleaseForm {
         }
 
         String name = JOptionPane.showInputDialog(mainPanel, "Nom de l'artifact", "agent");
-        return new Build(type, name);
+        return new Build(type, name, gitConfig);
     }
 
 

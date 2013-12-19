@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.codjo.tools.farow.Display;
+import net.codjo.tools.farow.util.GitConfigUtil;
 /**
  *
  */
@@ -14,10 +15,15 @@ public class MavenCommand extends Command {
     static final String CODJO_PLUGIN_PREFIX = "net.codjo.maven.mojo:maven-codjo-plugin:x.xx";
 
 
-    public MavenCommand(ArtifactType artifactType, String libName, String mavenPhase, String... parameters) {
+    public MavenCommand(ArtifactType artifactType,
+                        String libName,
+                        GitConfigUtil gitConfigUtil,
+                        String mavenPhase,
+                        String... parameters) {
         super("execute mvn " + buildMavenPhase(mavenPhase, CODJO_PLUGIN_PREFIX), artifactType, libName);
         this.mavenPhase = buildMavenPhase(mavenPhase, CODJO_PLUGIN_PREFIX);
-        this.commands = new String[]{artifactType.getCodjoCommand(), name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory(),
+        this.commands = new String[]{artifactType.getCodjoCommand(), name, gitConfigUtil.getGithubAccount(),
+                                     artifactType.getWorkingDirectory(),
                                      "&",
                                      "mvn", "--batch-mode", "--fail-fast", this.mavenPhase};
         if (parameters != null) {

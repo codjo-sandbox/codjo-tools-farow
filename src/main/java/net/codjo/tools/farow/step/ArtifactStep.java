@@ -1,5 +1,4 @@
 package net.codjo.tools.farow.step;
-import java.io.File;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CommandPlayer;
 public abstract class ArtifactStep extends Step {
@@ -27,10 +26,8 @@ public abstract class ArtifactStep extends Step {
 
 
     public static String getGitScmAdditionalParameter(ArtifactType type, String name) {
-        if (new File(type.toArtifactPath(name) + "\\.git").exists()) {
-            return "-DconnectionUrl=scm:git:file:///" + type.toArtifactPath(name) + "\\.git";
-        }
-        return "";
+        // ATTENTION  CODE EXECUTE A L OUVERTURE DE FAROW !!!
+        return "-DconnectionUrl=scm:git:file:///" + type.toArtifactPath(name) + "\\.git";
     }
 
 

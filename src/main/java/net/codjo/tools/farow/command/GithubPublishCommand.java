@@ -1,7 +1,7 @@
 package net.codjo.tools.farow.command;
 import java.io.IOException;
-import java.util.Properties;
 import net.codjo.tools.farow.Display;
+import net.codjo.tools.farow.util.GitConfigUtil;
 /**
  *
  */
@@ -9,17 +9,18 @@ public class GithubPublishCommand extends Command {
     private String[] commands;
 
 
-    public GithubPublishCommand(ArtifactType artifactType, String libName, Properties properties) {
+    public GithubPublishCommand(ArtifactType artifactType, String libName, GitConfigUtil gitConfigUtil) {
         super("execute github publish commands ", artifactType, libName);
 
-        String githubAccount = properties.getProperty("githubAccount");
-        String githubPassword = properties.getProperty("githubPassword");
+        String githubAccount = gitConfigUtil.getGithubAccount();
+        String githubPassword = gitConfigUtil.getGithubPassword();
 
         this.commands = new String[]{
               "copy", "/Y", "%USERPROFILE%\\_netrc", "%USERPROFILE%\\_netrc_backup", "&",
               "echo", "machine", "github.com", "login", githubAccount, "password", githubPassword, ">",
               "%USERPROFILE%\\_netrc", "&",
-              artifactType.getCodjoCommand(), name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory(), "&",
+              artifactType.getCodjoCommand(), name, artifactType.getGithubAccount(), artifactType.getWorkingDirectory(),
+              "&",
               "git", "checkout", "master", "&",
               "git", "merge", "integration", "&",
               "git", "gc", "&",

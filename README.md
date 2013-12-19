@@ -53,7 +53,6 @@ TODO :
 * Refactoring NexusApi/Teamlab --> http communication layer ?
 * Add a configuration GUI
 * Refactoring of main form
-* Enhance teamlab connection (awfull GUI)
 * Github interaction :
    - verify pull requests before starting stabilisation
    - forked project deletion
