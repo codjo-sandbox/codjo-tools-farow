@@ -26,10 +26,8 @@ public abstract class ArtifactStep extends Step {
 
 
     public static String getGitScmAdditionalParameter(ArtifactType type, String name) {
-        if (type.equals(ArtifactType.LIB) || type.equals(ArtifactType.SUPER_POM)) {
-            return "-DconnectionUrl=scm:git:file:///" + type.toArtifactPath(name) + "\\.git";
-        }
-        return "";
+        // ATTENTION  CODE EXECUTE A L OUVERTURE DE FAROW !!!
+        return "-DconnectionUrl=scm:git:file:///" + type.toArtifactPath(name) + "\\.git";
     }
 
 
