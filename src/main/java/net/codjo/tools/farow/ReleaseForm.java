@@ -34,15 +34,14 @@ import net.codjo.gui.toolkit.util.ErrorDialog;
 import net.codjo.i18n.common.Language;
 import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.gui.TranslationNotifier;
+import net.codjo.tools.farow.actions.PrepareAction;
 import net.codjo.tools.farow.command.ArtifactSorter;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CleanInhouseSnapshot;
 import net.codjo.tools.farow.command.CleanUpDirectoryCommand;
 import net.codjo.tools.farow.command.CommandPlayer;
 import net.codjo.tools.farow.command.CopyPomCommand;
-import net.codjo.tools.farow.command.GetItCommand;
 import net.codjo.tools.farow.command.IdeaCommand;
-import net.codjo.tools.farow.command.ImportArtifactsCommand;
 import net.codjo.tools.farow.command.MavenCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
@@ -92,11 +91,7 @@ public class ReleaseForm {
 
         initializeBuildListPanel();
 
-        prepareButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                warnPrepareAndRelaseSuperPom();
-            }
-        });
+        prepareButton.setAction(new PrepareAction(this));
         releaseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 buildList.clearSelection();
@@ -244,43 +239,6 @@ public class ReleaseForm {
                 }
             }
         });
-    }
-
-
-    private void warnPrepareAndRelaseSuperPom() {
-        final int result = JOptionPane.showConfirmDialog(getMainPanel(),
-                                                         "Les étapes ci-dessous ont-elles été faites :   \n"
-                                                         + "- ajout de la \"pool request\" du super-pom,  \n"
-                                                         + "- validation de toutes les \"pool request\"?  \n\n",
-                                                         "Github - Pool Request",
-                                                         JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (result == 0) {
-            prepareButton.setEnabled(false);
-            CommandPlayer player = new CommandPlayer();
-
-            player.add(new CleanUpDirectoryCommand(ArtifactType.SUPER_POM, ArtifactType.SUPER_POM.name()));
-            player.add(new GetItCommand(ArtifactType.SUPER_POM, "", gitConfig));
-
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "codjo:send-announcement-to-teams",
-                                        "-DisStarting=true"));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM,
-                                        "",
-                                        gitConfig,
-                                        "codjo:update-confluence-before-release"));
-
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "codjo:release",
-                                        "-DstabilisationFileName=" + DEFAULT_BUILD_LIST_FILE.getAbsolutePath()));
-            player.add(new ImportArtifactsCommand(this, DEFAULT_BUILD_LIST_FILE));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "release:prepare",
-                                        "-Ddocumentation=disabled"));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "release:perform",
-                                        "-Ddocumentation=disabled",
-                                        ArtifactStep.getGitScmAdditionalParameter(ArtifactType.SUPER_POM, "unused"),
-                                        ArtifactStep.getCodjoDeploymentParameter()));
-
-            StepInvoker invoker = new StepInvoker("Premières étapes", player);
-            invoker.start();
-        }
     }
 
 
@@ -687,6 +645,16 @@ public class ReleaseForm {
     }
 
 
+    public GitConfigUtil getGitConfig() {
+        return gitConfig;
+    }
+
+
+    public File getBuildListFile() {
+        return DEFAULT_BUILD_LIST_FILE;
+    }
+
+
     private class DisplayAdapter implements Display {
         private final JTextArea area;
         private JLabel informationLabel;
@@ -749,6 +717,12 @@ public class ReleaseForm {
             return this;
         }
     }
+
+
+    public void createAndStartStepInvoker(String stepName, CommandPlayer commandPlayer) {
+        new StepInvoker(stepName, commandPlayer).start();
+    }
+
 
     private class StepInvoker extends SwingWorker {
         private final DisplayAdapter buildDisplay;
