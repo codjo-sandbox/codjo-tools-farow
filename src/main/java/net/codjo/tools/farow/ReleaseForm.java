@@ -5,15 +5,12 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -41,11 +38,11 @@ import net.codjo.tools.farow.command.ArtifactSorter;
 import net.codjo.tools.farow.command.ArtifactType;
 import net.codjo.tools.farow.command.CleanInhouseSnapshot;
 import net.codjo.tools.farow.command.CleanUpDirectoryCommand;
-import net.codjo.tools.farow.command.Command;
 import net.codjo.tools.farow.command.CommandPlayer;
 import net.codjo.tools.farow.command.CopyPomCommand;
 import net.codjo.tools.farow.command.GetItCommand;
 import net.codjo.tools.farow.command.IdeaCommand;
+import net.codjo.tools.farow.command.ImportArtifactsCommand;
 import net.codjo.tools.farow.command.MavenCommand;
 import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
 import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
@@ -55,6 +52,7 @@ import net.codjo.tools.farow.step.DeleteRepo;
 import net.codjo.tools.farow.step.Publish;
 import net.codjo.tools.farow.step.Step;
 import net.codjo.tools.farow.step.Step.State;
+import net.codjo.tools.farow.util.BuildListFileLoader;
 import net.codjo.tools.farow.util.GitConfigUtil;
 /**
  *
@@ -272,7 +270,7 @@ public class ReleaseForm {
 
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "codjo:release",
                                         "-DstabilisationFileName=" + DEFAULT_BUILD_LIST_FILE.getAbsolutePath()));
-            player.add(new ImportArtifactsCommand());
+            player.add(new ImportArtifactsCommand(this, DEFAULT_BUILD_LIST_FILE));
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "release:prepare",
                                         "-Ddocumentation=disabled"));
             player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "release:perform",
@@ -463,34 +461,8 @@ public class ReleaseForm {
     }
 
 
-    private void loadBuildListFile(File selectedFile) throws IOException {
-        final List<Build> builds = new ArrayList<Build>();
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(selectedFile));
-        String line = bufferedReader.readLine();
-        while (line != null) {
-            if ("".equals(line.trim())) {
-                break;
-            }
-
-            ArtifactType artifactType = null;
-            String[] words = line.split(" ");
-            String artifact = words[0];
-            if ("lib".equalsIgnoreCase(artifact)) {
-                artifactType = ArtifactType.LIB;
-            }
-            else if ("plugin".equalsIgnoreCase(artifact)) {
-                artifactType = ArtifactType.PLUGIN;
-            }
-            else if ("libmaven".equalsIgnoreCase(artifact)) {
-                artifactType = ArtifactType.LIB_MAVEN;
-            }
-            else if ("ontology".equalsIgnoreCase(artifact)) {
-                artifactType = ArtifactType.ONTOLOGIE;
-            }
-
-            builds.add(new Build(artifactType, words[1], gitConfig));
-            line = bufferedReader.readLine();
-        }
+    public void loadBuildListFile(File selectedFile) throws IOException {
+        final List<Build> builds = new BuildListFileLoader().load(selectedFile, gitConfig);
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -821,19 +793,6 @@ public class ReleaseForm {
                                               JOptionPane.ERROR_MESSAGE);
                 appendAuditRow(tabName + " : échec");
             }
-        }
-    }
-
-    private class ImportArtifactsCommand extends Command {
-        private ImportArtifactsCommand() {
-            super("Importation des artifacts à stabiliser");
-        }
-
-
-        @Override
-        public void execute(Display display) throws Exception {
-            //trie
-            loadBuildListFile(DEFAULT_BUILD_LIST_FILE);
         }
     }
 }
