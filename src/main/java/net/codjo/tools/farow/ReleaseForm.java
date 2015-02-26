@@ -35,16 +35,11 @@ import net.codjo.i18n.common.Language;
 import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.gui.TranslationNotifier;
 import net.codjo.tools.farow.actions.PrepareAction;
+import net.codjo.tools.farow.actions.UpdateArtifactManagerAction;
 import net.codjo.tools.farow.command.ArtifactSorter;
 import net.codjo.tools.farow.command.ArtifactType;
-import net.codjo.tools.farow.command.CleanInhouseSnapshot;
-import net.codjo.tools.farow.command.CleanUpDirectoryCommand;
 import net.codjo.tools.farow.command.CommandPlayer;
-import net.codjo.tools.farow.command.CopyPomCommand;
-import net.codjo.tools.farow.command.IdeaCommand;
 import net.codjo.tools.farow.command.MavenCommand;
-import net.codjo.tools.farow.command.PrepareAPomToLoadSuperPomDependenciesCommand;
-import net.codjo.tools.farow.command.SetNexusProxySettingsCommand;
 import net.codjo.tools.farow.step.ArtifactStep;
 import net.codjo.tools.farow.step.Build;
 import net.codjo.tools.farow.step.DeleteRepo;
@@ -117,11 +112,7 @@ public class ReleaseForm {
             }
         });
 
-        artifactManagerUpdateButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                runArtifactManagerUpdate();
-            }
-        });
+        artifactManagerUpdateButton.setAction(new UpdateArtifactManagerAction(this));
 
         confluenceUpdateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -280,47 +271,6 @@ public class ReleaseForm {
             InternationalizationUtil.registerBundlesIfNeeded(translationManager);
             ErrorDialog.setTranslationBackpack(translationManager, translationNotifier);
             ErrorDialog.show(getMainPanel(), "", exc);
-        }
-    }
-
-
-    private void runArtifactManagerUpdate() {
-        String frameworkVersion = JOptionPane.showInputDialog("Merci de preciser le numéro de version du framework");
-        if (frameworkVersion == null || frameworkVersion.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(getMainPanel(),
-                                          "Le numéro de version du framework ne peut etre null ou vide",
-                                          "Impossible de finaliser la Stabilisation",
-                                          JOptionPane.ERROR_MESSAGE);
-        }
-        else {
-            CommandPlayer player = new CommandPlayer();
-            player.add(new CleanUpDirectoryCommand("C:\\Dev\\platform\\tools\\maven\\local\\maven2\\net\\codjo\\pom"));
-            player.add(new CleanInhouseSnapshot());
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "deploy"));
-            player.add(new MavenCommand(ArtifactType.SUPER_POM, "", gitConfig, "deploy", ArtifactStep.REMOTE_CODJO));
-            // Rapatriement des librairies postées sur repo.codjo.net avec maven et nexus
-            player.add(new SetNexusProxySettingsCommand(gitConfig.getProxyUserName(),
-                                                        gitConfig.getProxyPassword(),
-                                                        properties));
-
-            String codjoPomAllDepsDirectory = "pom-alldeps";
-            String codjoPomAllDepsPath = ArtifactType.LIB.toArtifactPath(codjoPomAllDepsDirectory);
-            String temporaryLocalRepository = ArtifactType.LIB.toArtifactPath("repo");
-
-            player.add(new CleanUpDirectoryCommand(codjoPomAllDepsPath));
-            player.add(new CopyPomCommand(ArtifactType.SUPER_POM, "", codjoPomAllDepsPath, gitConfig));
-            player.add(new PrepareAPomToLoadSuperPomDependenciesCommand(codjoPomAllDepsPath, frameworkVersion));
-
-            player.add(new CleanUpDirectoryCommand(temporaryLocalRepository));
-            player.add(new IdeaCommand(ArtifactType.LIB,
-                                       codjoPomAllDepsDirectory,
-                                       temporaryLocalRepository,
-                                       gitConfig));
-
-            player.add(new SetNexusProxySettingsCommand(null, null, properties));
-
-            StepInvoker invoker = new StepInvoker("Mise à jour du gestionnaire d'artifact", player);
-            invoker.start();
         }
     }
 
@@ -652,6 +602,11 @@ public class ReleaseForm {
 
     public File getBuildListFile() {
         return DEFAULT_BUILD_LIST_FILE;
+    }
+
+
+    public Properties getProperties() {
+        return properties;
     }
 
 
